@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>暑假成长积分银行</title>
+<style>
+:root {
+  --mauve-50: #F6F2F0;
+  --mauve-100: #EDE6E3;
+  --mauve-200: #E0D5D1;
+  --mauve-300: #CEC0BB;
+  --mauve-400: #B8A8A3;
+  --mauve-500: #9E8C87;
+  --mauve-600: #857470;
+  --mauve-700: #6B5C59;
+  --dusty-rose-50: #F4EDEA;
+  --dusty-rose-100: #EBDEDA;
+  --dusty-rose-200: #DCCBC5;
+  --dusty-rose-300: #C8B0A8;
+  --dusty-rose-400: #B4958C;
+  --dusty-rose-500: #A07D74;
+  --sage-50: #F0F1ED;
+  --sage-100: #E4E6E0;
+  --sage-200: #D2D5CD;
+  --white: #FFFFFF;
+  --text-primary: #5C4B51;
+  --text-secondary: #8B7B82;
+  --text-muted: #B5A8AD;
+  --bg: #F7F4F1;
+  --card: #FFFFFF;
+  --shadow: 0 2px 16px rgba(107, 92, 89, 0.06);
+  --shadow-lg: 0 4px 24px rgba(107, 92, 89, 0.10);
+  --radius: 16px;
+  --radius-lg: 20px;
+  --radius-sm: 12px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  padding-bottom: 90px;
+}
+
+/* ========== Header ========== */
+.header {
+  background: linear-gradient(135deg, #C8B0A8 0%, #B8A8A3 50%, #A08B85 100%);
+  padding: 28px 20px 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  top: -40px; right: -30px;
+  width: 140px; height: 140px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  bottom: -50px; left: -20px;
+  width: 100px; height: 100px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+.header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.header-subtitle {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sync indicator */
+.sync-dot {
+  font-size: 10px;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+.sync-dot.synced { animation: sync-pulse 2s ease infinite; }
+@keyframes sync-pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Settings floating button */
+.settings-fab {
+  position: fixed;
+  top: 34px;
+  right: 20px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.settings-fab:hover { background: rgba(255,255,255,0.4); transform: rotate(30deg); }
+.score-badge {
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(8px);
+  border-radius: 24px;
+  padding: 10px 18px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.score-badge .score-num {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+.score-badge .score-label {
+  font-size: 11px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+/* ========== Stats row ========== */
+.stats-row {
+  display: flex;
+  gap: 10px;
+  margin: -10px 16px 12px;
+  position: relative;
+  z-index: 2;
+}
+.stat-card {
+  flex: 1;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-card .stat-icon { font-size: 22px; margin-bottom: 4px; }
+.stat-card .stat-val { font-size: 18px; font-weight: 700; color: var(--mauve-700); }
+.stat-card .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ========== Top Dashboard ========== */
+.top-dashboard {
+  margin: 0 16px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.dash-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.dash-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.dash-card .dash-icon {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+.dash-card .dash-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.dash-card .dash-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--mauve-700);
+  line-height: 1.2;
+}
+.dash-card .dash-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.3;
+}
+.dash-card .dash-action {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--mauve-600);
+  background: var(--mauve-100);
+  padding: 3px 10px;
+  border-radius: 10px;
+  transition: var(--transition);
+}
+.dash-card:hover .dash-action { background: var(--mauve-200); }
+
+/* Task Dashboard - quick complete area */
+.dash-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 96px;
+  overflow-y: auto;
+}
+.dash-task-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 3px 4px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+.dash-task-item:hover { background: var(--mauve-50); }
+.dash-task-item.done { opacity: 0.45; text-decoration: line-through; }
+.dash-task-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--mauve-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+.dash-task-item.done .dash-task-dot {
+  background: var(--mauve-600);
+  border-color: var(--mauve-600);
+  color: white;
+}
+.dash-task-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dash-task-pts {
+  font-weight: 800;
+  color: var(--mauve-600);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+/* Account Dashboard */
+.dash-account {
+  text-align: center;
+}
+.dash-account .dash-value {
+  font-size: 28px;
+  margin: 4px 0;
+}
+
+/* Deposit Slip Dashboard */
+.dash-deposit {
+  text-align: center;
+}
+.dash-deposit-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--mauve-100);
+  border-radius: 3px;
+  margin: 6px 0;
+  overflow: hidden;
+}
+.dash-deposit-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #D4C5C0, #C8B0A8, #A08B85);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.dash-deposit-tag {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--mauve-600);
+  background: var(--mauve-50);
+  padding: 2px 8px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* deposit strip animations */
+@keyframes pulse-deposit {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; transform: scale(1.02); }
+}
+.dash-deposit-active { animation: pulse-deposit 2s ease infinite; }
+
+/* ========== Section titles ========== */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px 6px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.section-title .icon { font-size: 22px; }
+
+/* ========== Growth Map ========== */
+.growth-map {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+.growth-map .dim-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: var(--transition);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+.dim-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.dim-card.active {
+  border-color: var(--mauve-400);
+  background: linear-gradient(135deg, #F4EDEA 0%, #EDE6E3 100%);
+}
+.dim-card .dim-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+.dim-card .dim-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.dim-card .dim-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+.dim-card .dim-progress {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dim-card .dim-stars { color: #FBBF24; font-size: 14px; }
+.dim-card .dim-count { font-size: 12px; color: var(--text-secondary); }
+
+/* dim colors */
+.dim-learn .dim-icon { background: #F4EDEA; }
+.dim-sport .dim-icon { background: #EDE6E3; }
+.dim-control .dim-icon { background: #F4EDEA; }
+.dim-explore .dim-icon { background: #EDE6E3; }
+.dim-practice .dim-icon { background: #F4EDEA; }
+
+/* ========== Check-in ========== */
+.checkin-filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.checkin-filters::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--card);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--mauve-200);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.filter-chip.active {
+  background: var(--mauve-600);
+  color: white;
+  border-color: var(--mauve-600);
+}
+.task-list { padding: 0 16px; }
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 14px 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+.task-item.done { opacity: 0.55; }
+.task-item.done .task-name { text-decoration: line-through; }
+.task-cat {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.cat-learn { background: #F4EDEA; color: #9B7B78; }
+.cat-sport { background: #EDE6E3; color: #857470; }
+.cat-control { background: #F4EDEA; color: #8B6F6C; }
+.cat-explore { background: #EDE6E3; color: #7B6B68; }
+.cat-practice { background: #F4EDEA; color: #8B7570; }
+.task-info { flex: 1; min-width: 0; }
+.task-name { font-size: 14px; font-weight: 600; }
+.task-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.task-pts {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--mauve-600);
+  white-space: nowrap;
+}
+.task-check {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid var(--mauve-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+  font-size: 14px;
+  color: transparent;
+}
+.task-item.done .task-check {
+  background: var(--mauve-600);
+  border-color: var(--mauve-600);
+  color: white;
+}
+
+/* ========== Weekly Review ========== */
+.review-section {
+  padding: 0 16px 16px;
+}
+.review-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.review-card h3 {
+  font-size: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.review-input-group {
+  margin-bottom: 14px;
+}
+.review-input-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.review-input-group textarea {
+  width: 100%;
+  min-height: 60px;
+  border: 2px solid var(--mauve-200);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  background: var(--mauve-50);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+.review-input-group textarea:focus {
+  outline: none;
+  border-color: var(--mauve-400);
+  background: white;
+}
+.review-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+.review-stat {
+  background: linear-gradient(135deg, var(--mauve-50), var(--mauve-100));
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  text-align: center;
+}
+.review-stat .rv-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--mauve-700);
+}
+.review-stat .rv-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ========== Rewards ========== */
+.rewards-list { padding: 0 16px 16px; }
+.reward-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.reward-card .reward-badge {
+  position: absolute;
+  top: 0; right: 0;
+  padding: 6px 16px;
+  border-radius: 0 16px 0 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+.badge-small { background: linear-gradient(135deg, #D4C5C0, #C8B0A8); }
+.badge-mid { background: linear-gradient(135deg, #C8B5C0, #B8A8A3); }
+.badge-big { background: linear-gradient(135deg, #B5A0A8, #9E8C87); }
+.reward-card .reward-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-right: 70px;
+}
+.reward-items { display: flex; flex-direction: column; gap: 6px; }
+.reward-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--mauve-50);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.reward-item .ri-name { flex: 1; }
+.reward-item .ri-action {
+  font-size: 11px;
+  color: var(--mauve-600);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+.reward-item .ri-action:hover { background: var(--mauve-100); }
+.reward-note {
+  margin-top: 20px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--mauve-50), var(--mauve-100));
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+.reward-note p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* ========== Portfolio ========== */
+.portfolio-area {
+  padding: 0 16px 16px;
+}
+.upload-zone {
+  border: 2.5px dashed var(--mauve-300);
+  border-radius: var(--radius);
+  padding: 36px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--mauve-50), var(--mauve-100));
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 16px;
+}
+.upload-zone:hover { border-color: var(--mauve-400); background: linear-gradient(135deg, #EDE6E3, var(--mauve-200)); }
+.upload-zone .upload-icon { font-size: 40px; margin-bottom: 10px; }
+.upload-zone .upload-text { font-size: 14px; color: var(--text-secondary); font-weight: 600; }
+.upload-zone .upload-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+#fileInput { display: none; }
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.gallery-item {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.gallery-item img, .gallery-item video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.gallery-item .delete-btn {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: var(--transition);
+}
+.gallery-item:hover .delete-btn { opacity: 1; }
+.empty-gallery {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.empty-gallery .empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+/* ========== Bottom Nav ========== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--card);
+  display: flex;
+  box-shadow: 0 -2px 20px rgba(107, 92, 89, 0.06);
+  z-index: 100;
+  padding: 6px 0 env(safe-area-inset-bottom, 6px);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  border: none;
+  background: none;
+}
+.nav-item .nav-icon { font-size: 22px; transition: var(--transition); }
+.nav-item.active { color: var(--mauve-700); }
+.nav-item.active .nav-icon { transform: scale(1.1); }
+
+/* ========== Toast ========== */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--mauve-700);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(107, 92, 89, 0.25);
+}
+.toast.show { opacity: 1; }
+
+/* ========== Modal ========== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(92, 75, 81, 0.35);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.3s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal h3 { font-size: 18px; margin-bottom: 16px; color: var(--text-primary); }
+.modal textarea, .modal input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--mauve-200);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 12px;
+  background: var(--mauve-50);
+  transition: var(--transition);
+}
+.modal textarea:focus, .modal input:focus {
+  outline: none;
+  border-color: var(--mauve-400);
+  background: white;
+}
+.modal-btns { display: flex; gap: 10px; }
+.modal-btns button {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-cancel { background: var(--mauve-100); color: var(--text-secondary); }
+.btn-confirm { background: var(--mauve-600); color: white; }
+.btn-confirm:hover { background: var(--mauve-700); }
+
+/* ========== Settings Modal ========== */
+.modal-title { font-size:18px; font-weight:700; margin-bottom:8px; color:var(--text-primary); }
+.modal-desc { font-size:12px; color:var(--text-muted); margin-bottom:20px; line-height:1.5; }
+.settings-field { margin-bottom:16px; }
+.settings-field label { font-size:13px; font-weight:700; display:block; margin-bottom:4px; color:var(--text-secondary); }
+.settings-field input {
+  width:100%; padding:12px;
+  border:2px solid var(--mauve-200); border-radius:12px;
+  font-size:14px; font-family:inherit;
+  background:var(--mauve-50); transition:var(--transition);
+}
+.settings-field input:focus { outline:none; border-color:var(--mauve-400); background:white; }
+.settings-field .hint { font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.4; }
+.settings-actions { display:flex; gap:8px; }
+.settings-actions button {
+  flex:1; padding:12px;
+  border:none; border-radius:12px;
+  font-size:14px; font-weight:700; cursor:pointer; transition:var(--transition);
+}
+.setup-guide {
+  margin-top:16px; padding:14px;
+  background:var(--mauve-50); border-radius:12px;
+  font-size:12px; color:var(--text-secondary); line-height:1.8;
+}
+.setup-guide code {
+  background:var(--mauve-200); padding:1px 6px; border-radius:4px;
+  font-size:11px; color:var(--mauve-700);
+}
+
+/* ========== Page visibility ========== */
+.page { display: none; }
+.page.visible { display: block; }
+
+/* ========== Button ========== */
+.btn-primary {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 auto 16px;
+  padding: 14px;
+  background: linear-gradient(135deg, #C8B0A8, #B8A8A3);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 14px rgba(158, 140, 135, 0.25);
+}
+.btn-primary:hover { box-shadow: 0 6px 20px rgba(158, 140, 135, 0.35); transform: translateY(-1px); }
+
+/* animations */
+@keyframes sparkle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+.sparkle { animation: sparkle 0.5s ease; }
+
+/* task popup modal */
+.task-popup-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.task-popup-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background: var(--mauve-50);
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.task-popup-item:hover { background: var(--mauve-100); }
+.task-popup-item.completed { opacity: 0.5; text-decoration: line-through; }
+.task-popup-item .task-popup-pts { font-weight: 700; color: var(--mauve-600); }
+
+/* ========== Edit mode ========== */
+.edit-toggle {
+  margin-left: auto;
+  padding: 5px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid var(--mauve-300);
+  background: var(--card);
+  color: var(--mauve-600);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.edit-toggle.active {
+  background: var(--mauve-600);
+  color: white;
+  border-color: var(--mauve-600);
+}
+.task-item .edit-actions {
+  display: none;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.edit-mode .task-item .edit-actions {
+  display: flex;
+}
+.edit-mode .task-item {
+  cursor: default;
+}
+.edit-mode .task-check {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.edit-action-btn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.edit-action-btn.edit-btn {
+  background: var(--mauve-100);
+  color: var(--mauve-600);
+}
+.edit-action-btn.del-btn {
+  background: var(--dusty-rose-100);
+  color: #A07D74;
+}
+.edit-action-btn:hover { transform: scale(1.1); }
+.add-task-bar {
+  padding: 0 16px 16px;
+  display: none;
+}
+.edit-mode .add-task-bar {
+  display: block;
+}
+.modal select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--mauve-200);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 12px;
+  background: var(--mauve-50);
+  color: var(--text-primary);
+  transition: var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23857470' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+.modal select:focus {
+  outline: none;
+  border-color: var(--mauve-400);
+  background: white;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🏦 暑假成长积分银行</h1>
+      <div class="header-subtitle">用积分记录成长的每一天 <span class="sync-dot" id="syncDot" title="未配置同步">⚪</span></div>
+    </div>
+    <div class="score-badge">
+      <div class="score-num" id="totalScore">0</div>
+      <div class="score-label">总积分</div>
+    </div>
+  </div>
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon">✅</div>
+    <div class="stat-val" id="statDone">0</div>
+    <div class="stat-label">今日完成</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">⭐</div>
+    <div class="stat-val" id="statDims">0/5</div>
+    <div class="stat-label">已点亮维度</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📅</div>
+    <div class="stat-val" id="statWeek">0</div>
+    <div class="stat-label">本周积分</div>
+  </div>
+</div>
+
+<!-- ====== Top Dashboard (visible on all pages) ====== -->
+<div class="top-dashboard" id="topDashboard">
+  <!-- 今日任务 -->
+  <div class="dash-card" id="dashTasks" onclick="switchPage('checkin')">
+    <div class="dash-icon">📋</div>
+    <div class="dash-label">今日任务</div>
+    <div class="dash-task-list" id="dashTaskList"></div>
+    <div class="dash-sub" id="dashTasksEmpty" style="display:none">🎉 今日任务已全部完成！</div>
+    <div class="dash-action">打开打卡 →</div>
+  </div>
+
+  <!-- 我的成长账户 -->
+  <div class="dash-card dash-account" onclick="switchPage('rewards')">
+    <div class="dash-icon">🏦</div>
+    <div class="dash-label">我的成长账户</div>
+    <div class="dash-value" id="dashScore">0</div>
+    <div class="dash-sub">积分用来兑换看得见的鼓励</div>
+    <div class="dash-action">去兑换 →</div>
+  </div>
+
+  <!-- 今日成长存款单 -->
+  <div class="dash-card dash-deposit" onclick="switchPage('checkin')">
+    <div class="dash-icon">📜</div>
+    <div class="dash-label">今日成长存款单</div>
+    <div class="dash-value" id="dashTodayPts">0分</div>
+    <div class="dash-deposit-bar">
+      <div class="dash-deposit-fill" id="dashDepositFill" style="width:0%"></div>
+    </div>
+    <div class="dash-sub" id="dashDepositText">完成一项任务，存入成长能量</div>
+    <div class="dash-deposit-tag" id="dashDepositTag">今日存入 0 项</div>
+  </div>
+</div>
+
+<!-- ====== Page: Growth Map ====== -->
+<div class="page visible" id="page-map">
+  <div class="section-title"><span class="icon">🗺️</span>成长地图 · 五大维度</div>
+  <div class="growth-map" id="growthMap"></div>
+</div>
+
+<!-- ====== Page: Daily Check-in ====== -->
+<div class="page" id="page-checkin">
+  <div class="section-title">
+    <span class="icon">📋</span>今日打卡
+    <button class="edit-toggle" id="editToggle" onclick="toggleEditMode()">✏️ 编辑</button>
+  </div>
+  <div class="checkin-filters" id="checkinFilters"></div>
+  <div class="task-list" id="taskList"></div>
+  <div class="add-task-bar">
+    <button class="btn-primary" onclick="openAddTask()">+ 添加新任务</button>
+  </div>
+</div>
+
+<!-- ====== Page: Weekly Review ====== -->
+<div class="page" id="page-review">
+  <div class="section-title"><span class="icon">📝</span>每周家庭复盘</div>
+  <div class="review-section">
+    <div class="review-card">
+      <h3>🫂 这周的成长对话</h3>
+      <div class="review-input-group">
+        <label>🌟 这周我最棒的一件事是……</label>
+        <textarea id="reviewBest" placeholder="写下你最骄傲的一件事..."></textarea>
+      </div>
+      <div class="review-input-group">
+        <label>💪 这周我遇到的困难是……</label>
+        <textarea id="reviewHard" placeholder="分享你遇到的挑战..."></textarea>
+      </div>
+      <div class="review-input-group">
+        <label>👀 爸爸妈妈看见的进步（家长填写）</label>
+        <textarea id="reviewParent" placeholder="家长看到孩子这周的进步..."></textarea>
+      </div>
+      <div class="review-input-group">
+        <label>🤝 我希望得到的支持是……</label>
+        <textarea id="reviewSupport" placeholder="告诉爸爸妈妈你需要什么帮助..."></textarea>
+      </div>
+      <div class="review-stats">
+        <div class="review-stat">
+          <div class="rv-num" id="rvTasks">0</div>
+          <div class="rv-label">本周完成任务</div>
+        </div>
+        <div class="review-stat">
+          <div class="rv-num" id="rvScore">0</div>
+          <div class="rv-label">本周存入积分</div>
+        </div>
+        <div class="review-stat">
+          <div class="rv-num" id="rvDims">0</div>
+          <div class="rv-label">点亮维度数</div>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;margin:16px 0 0" onclick="saveReview()">💾 保存本周复盘</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Page: Rewards ====== -->
+<div class="page" id="page-rewards">
+  <div class="section-title"><span class="icon">🎁</span>奖励兑换</div>
+  <div class="rewards-list" id="rewardsList"></div>
+  <div class="reward-note">
+    <p>"积分不是为了控制孩子，<br>而是为了让孩子看见：<strong>我的努力是有价值的。</strong>"</p>
+    <p style="margin-top:8px;font-size:12px;">兑换前，可以让孩子说一说"这个奖励对应了我哪一段坚持"。</p>
+  </div>
+</div>
+
+<!-- ====== Page: Portfolio ====== -->
+<div class="page" id="page-portfolio">
+  <div class="section-title"><span class="icon">🎨</span>成长作品档案</div>
+  <div class="portfolio-area">
+    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">📸</div>
+      <div class="upload-text">点击上传成长作品</div>
+      <div class="upload-hint">支持图片和视频 · 记录暑假的精彩时刻</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*,video/*" multiple onchange="handleFileUpload(event)">
+    <div class="gallery" id="gallery"></div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-item active" data-page="map" onclick="switchPage('map')">
+    <span class="nav-icon">🗺️</span>成长地图
+  </button>
+  <button class="nav-item" data-page="checkin" onclick="switchPage('checkin')">
+    <span class="nav-icon">✅</span>今日打卡
+  </button>
+  <button class="nav-item" data-page="review" onclick="switchPage('review')">
+    <span class="nav-icon">📝</span>每周复盘
+  </button>
+  <button class="nav-item" data-page="rewards" onclick="switchPage('rewards')">
+    <span class="nav-icon">🎁</span>奖励兑换
+  </button>
+  <button class="nav-item" data-page="portfolio" onclick="switchPage('portfolio')">
+    <span class="nav-icon">🎨</span>成长作品
+  </button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsOverlay" style="display:none">
+  <div class="modal" style="max-width:420px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title">☁️ 云同步设置</div>
+    <div class="modal-desc">配置云数据库后，所有设备可共享同一个家庭数据。不同网络、不同地点都能实时同步。</div>
+
+    <div class="settings-field">
+      <label>🔌 云服务提供商</label>
+      <select id="cloudProviderSelect" onchange="onProviderChange()" style="width:100%;padding:12px;border:2px solid var(--mauve-200);border-radius:12px;font-size:14px;font-family:inherit;background:var(--mauve-50);color:var(--text-primary);appearance:none;-webkit-appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23857470' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer">
+        <option value="cloudbase">腾讯云 CloudBase（国内推荐）</option>
+        <option value="supabase">Supabase（需代理）</option>
+        <option value="leancloud">LeanCloud（已停服）</option>
+      </select>
+    </div>
+
+    <!-- CloudBase Fields (default shown) -->
+    <div id="cloudbaseFields">
+      <div class="settings-field">
+        <label>🏗️ CloudBase 环境 ID</label>
+        <input type="text" id="cloudbaseEnvInput" placeholder="例如：growth-bank-xxx">
+        <div class="hint">在腾讯云 CloudBase 控制台 → 环境概览 中复制</div>
+      </div>
+      <div class="hint" style="margin-top:4px;color:var(--mauve-500)">✓ 匿名登录无需密钥，填写环境 ID 即可</div>
+    </div>
+
+    <!-- LeanCloud Fields -->
+    <div id="leancloudFields" style="display:none">
+      <div class="settings-field">
+        <label>🆔 LeanCloud App ID</label>
+        <input type="text" id="leancloudIdInput" placeholder="例如：xxxxxxxxxxxxxxx">
+        <div class="hint">LeanCloud 已停服，无法注册新账号</div>
+      </div>
+      <div class="settings-field">
+        <label>🔑 LeanCloud App Key</label>
+        <input type="text" id="leancloudKeyInput" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        <div class="hint">同上页面中的 Master Key 或 App Key 均可</div>
+      </div>
+    </div>
+
+    <!-- Supabase Fields -->
+    <div id="supabaseFields" style="display:none">
+      <div class="settings-field">
+        <label>🔗 Supabase 项目 URL</label>
+        <input type="text" id="supabaseUrlInput" placeholder="https://xxxxxxxxxxxx.supabase.co">
+        <div class="hint">在 Supabase 控制台 → Settings → API 中复制</div>
+      </div>
+      <div class="settings-field">
+        <label>🔑 Anon Key（公开密钥）</label>
+        <input type="text" id="supabaseKeyInput2" placeholder="eyJhbGciOiJIUzI1NiIs...">
+        <div class="hint" style="color:#A07D74">此密钥可公开，仅用于前端读写的安全标识</div>
+      </div>
+    </div>
+
+    <div class="settings-field">
+      <label>👨‍👩‍👧‍👦 家庭码</label>
+      <input type="text" id="familyCodeInput" placeholder="例如 percytia2026" maxlength="30">
+      <div class="hint">所有设备使用相同的家庭码，数据即可互通</div>
+    </div>
+
+    <div class="settings-actions" style="margin-bottom:12px">
+      <button class="btn-cancel" onclick="testCloudConnection()" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">🔍 测试连接</button>
+      <button class="btn-cancel" onclick="syncPull(true)" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">📥 手动拉取</button>
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn-cancel" onclick="closeSettings()">取消</button>
+      <button class="btn-confirm" onclick="saveSettings()">💾 保存并同步</button>
+    </div>
+
+    <div class="setup-guide" id="setupGuide">
+      <strong>📖 如何配置 CloudBase（国内推荐）：</strong><br>
+      1. 打开 <a href="https://console.cloud.tencent.com/tcb" target="_blank" style="color:var(--mauve-600)">腾讯云 CloudBase 控制台</a>，登录腾讯云账号<br>
+      2. 新建环境 → 选「免费体验版」→ 数据库选「云数据库（默认）」<br>
+      3. 进入环境 → 设置 → 登录授权 → 开启「<b>匿名登录</b>」<br>
+      4. 回到「环境概览」，复制「环境 ID」填入上方<br>
+      5. <b>必须配置安全来源</b>：进入 环境 → 安全来源 → 添加你的网页域名<br>
+      <br>
+      <strong>⚠️ 部署到 GitHub Pages 后务必操作：</strong><br>
+      • 将 <code>jesscia1988.github.io</code> 添加到「安全来源」列表<br>
+      • 本地测试时加上 <code>localhost</code> 和 <code>127.0.0.1</code>
+      <br><br>
+      <strong>💡 为什么选 CloudBase？</strong><br>
+      • 腾讯云国内服务器，稳定可访问<br>
+      • 免费额度：每月 2GB 存储 + 5GB CDN + 100万次调用<br>
+      • 匿名登录 + 纯前端 fetch，无需 SDK 加载<br>
+      • 无需代理/VPN，数据安全合规
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" style="display:none">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+// ============ DATA ============
+const DIMENSIONS = [
+  { id: 'learn', name: '学习力', icon: '📚', desc: '阅读、练字、复盘，让学习变成稳定的好习惯', color: '#9B7B78' },
+  { id: 'sport', name: '运动力', icon: '⚽', desc: '运动和户外，让身体先充满假期的电量', color: '#857470' },
+  { id: 'control', name: '自控力', icon: '⏰', desc: '安排时间、管理屏幕，把计划握在自己手里', color: '#8B6F6C' },
+  { id: 'explore', name: '探索力', icon: '🔍', desc: '兴趣、情绪和沟通，找到属于自己的好奇心', color: '#7B6B68' },
+  { id: 'practice', name: '实践力', icon: '🛠️', desc: '家务、做饭、志愿服务，把成长做出来', color: '#8B7570' },
+];
+
+const CAT_NAMES = { learn: '学习力', sport: '运动力', control: '自控力', explore: '探索力', practice: '实践力' };
+const CAT_CLASSES = { learn: 'cat-learn', sport: 'cat-sport', control: 'cat-control', explore: 'cat-explore', practice: 'cat-practice' };
+
+const DEFAULT_TASKS = [
+  { id: 't1', cat: 'learn', name: '认真写日记', desc: '记录今天的所见所思', pts: 2 },
+  { id: 't2', cat: 'learn', name: '课外阅读30分钟', desc: '选一本好书，静心阅读', pts: 2 },
+  { id: 't3', cat: 'learn', name: '练字20分钟', desc: '一笔一划，字如其人', pts: 1 },
+  { id: 't4', cat: 'learn', name: '今日学习复盘', desc: '回顾今天学到的知识', pts: 1 },
+  { id: 't5', cat: 'sport', name: '户外活动2小时', desc: '阳光下尽情奔跑', pts: 2 },
+  { id: 't6', cat: 'sport', name: '运动锻炼30分钟', desc: '跳绳、跑步或球类运动', pts: 2 },
+  { id: 't7', cat: 'sport', name: '散步8000步', desc: '饭后散步，放松身心', pts: 1 },
+  { id: 't8', cat: 'control', name: '控制屏幕≤2小时', desc: '拿回时间的主动权', pts: 2 },
+  { id: 't9', cat: 'control', name: '自己制定明日计划', desc: '提前规划，心中有数', pts: 1 },
+  { id: 't10', cat: 'control', name: '按时起床睡觉', desc: '规律作息，元气满满', pts: 1 },
+  { id: 't11', cat: 'explore', name: '探索一个新兴趣', desc: '画画、编程、手工…都可以', pts: 2 },
+  { id: 't12', cat: 'explore', name: '和家人认真聊天', desc: '表达情绪，学会倾听', pts: 1 },
+  { id: 't13', cat: 'explore', name: '写情绪日记', desc: '觉察并记录自己的感受', pts: 1 },
+  { id: 't14', cat: 'practice', name: '做一项家务', desc: '洗碗、扫地、整理房间', pts: 2 },
+  { id: 't15', cat: 'practice', name: '帮家人做饭', desc: '一起准备一顿美味的饭菜', pts: 2 },
+  { id: 't16', cat: 'practice', name: '照顾植物/宠物', desc: '培养责任心与爱心', pts: 1 },
+];
+
+const DEFAULT_REWARDS = {
+  small: { label: '10分 · 小奖励', cls: 'badge-small', items: [
+    { name: '选择一次家庭电影', pts: 10 }, { name: '点播一次睡前故事', pts: 10 },
+    { name: '选择一次晚餐菜单', pts: 10 }, { name: '多玩30分钟游戏', pts: 10 },
+  ]},
+  mid: { label: '30分 · 中奖励', cls: 'badge-mid', items: [
+    { name: '买一本喜欢的书', pts: 30 }, { name: '一次朋友聚会', pts: 30 },
+    { name: '一次亲子外出', pts: 30 }, { name: 'DIY手工材料包', pts: 30 },
+  ]},
+  big: { label: '60分 · 大奖励', cls: 'badge-big', items: [
+    { name: '一次短途旅行', pts: 60 }, { name: '实现一个期待的小愿望', pts: 60 },
+    { name: '去游乐园玩一天', pts: 60 }, { name: '选一个心仪的玩具', pts: 60 },
+  ]},
+};
+
+// ============ STATE ============
+function loadState() {
+  try {
+    const raw = localStorage.getItem('growth_bank_state');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return {
+    tasks: JSON.parse(JSON.stringify(DEFAULT_TASKS)),
+    rewards: JSON.parse(JSON.stringify(DEFAULT_REWARDS)),
+    completedToday: {},
+    totalScore: 0,
+    weekStart: getMonday(new Date()),
+    review: { best: '', hard: '', parent: '', support: '' },
+    portfolio: [],
+    todayDate: getDateKey(new Date()),
+  };
+}
+
+function saveState(state) {
+  localStorage.setItem('growth_bank_state', JSON.stringify(state));
+  autoSyncPush(state);
+}
+
+function getDateKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function getMonday(d) { const n = new Date(d); n.setDate(n.getDate() - ((n.getDay() + 6) % 7)); n.setHours(0,0,0,0); return n.toISOString().split('T')[0]; }
+
+// ============ CLOUD SYNC (Tencent CloudBase REST API) ============
+// 支持多后端：CloudBase（国内推荐）/ Supabase（需代理）/ LeanCloud（已停服）
+// CloudBase 使用 HTTP API v1：https://docs.cloudbase.net/http-api/basic/overview
+var SYNC_CONFIG = { provider: 'cloudbase', envId: '', familyCode: '' };
+var syncTimer = null;
+var syncLock = false;
+var _cloudbaseToken = '';       // cached anonymous access_token
+var _cloudbaseDeviceId = '';    // cached device-id for anonymous login
+
+// --- CloudBase: get or create device-id ---
+function _getDeviceId() {
+  if (_cloudbaseDeviceId) return _cloudbaseDeviceId;
+  try { _cloudbaseDeviceId = localStorage.getItem('growth_bank_device_id'); } catch(e) {}
+  if (!_cloudbaseDeviceId) {
+    _cloudbaseDeviceId = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
+    try { localStorage.setItem('growth_bank_device_id', _cloudbaseDeviceId); } catch(e) {}
+  }
+  return _cloudbaseDeviceId;
+}
+
+// --- Low-level REST helpers ---
+function cloudHeaders() {
+  if (SYNC_CONFIG.provider === 'cloudbase') {
+    var h = { 'Content-Type': 'application/json' };
+    if (_cloudbaseToken) h['Authorization'] = 'Bearer ' + _cloudbaseToken;
+    return h;
+  } else if (SYNC_CONFIG.provider === 'leancloud') {
+    return {
+      'X-AVOS-Application-Id': SYNC_CONFIG.envId,
+      'Content-Type': 'application/json'
+    };
+  } else {
+    // Supabase fallback
+    return {
+      'apikey': SYNC_CONFIG.envId,
+      'Authorization': 'Bearer ' + SYNC_CONFIG.envId,
+      'Content-Type': 'application/json'
+    };
+  }
+}
+
+function cloudUrl(path) {
+  if (SYNC_CONFIG.provider === 'cloudbase') {
+    // CloudBase HTTP API: https://{envId}.api.tcloudbasegateway.com/v1/{path}
+    return 'https://' + SYNC_CONFIG.envId + '.api.tcloudbasegateway.com/v1/' + path;
+  } else if (SYNC_CONFIG.provider === 'leancloud') {
+    return 'https://api.leancloud.cn/1.1/' + path;
+  } else {
+    return (SYNC_CONFIG.envId.replace(/\/+$/, '')) + '/rest/v1/' + path;
+  }
+}
+
+// --- Config load / save ---
+function loadSyncConfig() {
+  try {
+    var raw = localStorage.getItem('growth_bank_sync_config');
+    if (raw) SYNC_CONFIG = JSON.parse(raw);
+  } catch(e) { SYNC_CONFIG = { provider: 'cloudbase', envId: '', familyCode: '' }; }
+  // Migrate old formats
+  if (!SYNC_CONFIG.envId && SYNC_CONFIG.supabaseUrl) {
+    SYNC_CONFIG.provider = 'supabase';
+    SYNC_CONFIG.envId = SYNC_CONFIG.supabaseUrl;
+  }
+  if (!SYNC_CONFIG.envId && SYNC_CONFIG.appId) {
+    SYNC_CONFIG.provider = 'leancloud';
+    SYNC_CONFIG.envId = SYNC_CONFIG.appId;
+  }
+  if (!SYNC_CONFIG.provider) SYNC_CONFIG.provider = 'cloudbase';
+  // Restore cached token
+  try { _cloudbaseToken = JSON.parse(localStorage.getItem('growth_bank_cb_token') || '""'); } catch(e) { _cloudbaseToken = ''; }
+  updateSyncUi();
+}
+
+function saveSyncConfig() {
+  localStorage.setItem('growth_bank_sync_config', JSON.stringify(SYNC_CONFIG));
+  updateSyncUi();
+}
+
+function isSyncEnabled() {
+  if (SYNC_CONFIG.provider === 'cloudbase') {
+    return !!(SYNC_CONFIG.envId && SYNC_CONFIG.familyCode);
+  }
+  return !!(SYNC_CONFIG.provider && SYNC_CONFIG.envId && SYNC_CONFIG.familyCode);
+}
+
+// --- Settings UI ---
+function openSettings() {
+  document.getElementById('cloudProviderSelect').value = SYNC_CONFIG.provider || 'cloudbase';
+  document.getElementById('cloudbaseEnvInput').value = (SYNC_CONFIG.provider === 'cloudbase') ? (SYNC_CONFIG.envId || '') : '';
+  document.getElementById('leancloudIdInput').value = (SYNC_CONFIG.provider === 'leancloud') ? (SYNC_CONFIG.envId || '') : '';
+  document.getElementById('supabaseUrlInput').value = (SYNC_CONFIG.provider === 'supabase') ? (SYNC_CONFIG.envId || '') : '';
+  document.getElementById('familyCodeInput').value = SYNC_CONFIG.familyCode || '';
+  toggleProviderFields(SYNC_CONFIG.provider || 'cloudbase');
+  document.getElementById('settingsOverlay').style.display = 'flex';
+}
+
+function closeSettings() {
+  document.getElementById('settingsOverlay').style.display = 'none';
+}
+
+function onProviderChange() {
+  var provider = document.getElementById('cloudProviderSelect').value;
+  toggleProviderFields(provider);
+}
+
+function toggleProviderFields(provider) {
+  var cbFields = document.getElementById('cloudbaseFields');
+  var lcFields = document.getElementById('leancloudFields');
+  var sbFields = document.getElementById('supabaseFields');
+  cbFields.style.display = (provider === 'cloudbase' ? 'block' : 'none');
+  lcFields.style.display = (provider === 'leancloud' ? 'block' : 'none');
+  sbFields.style.display = (provider === 'supabase' ? 'block' : 'none');
+}
+
+function saveSettings() {
+  var provider = document.getElementById('cloudProviderSelect').value;
+  SYNC_CONFIG.provider = provider;
+  if (provider === 'cloudbase') {
+    SYNC_CONFIG.envId = document.getElementById('cloudbaseEnvInput').value.trim();
+  } else if (provider === 'leancloud') {
+    SYNC_CONFIG.envId = document.getElementById('leancloudIdInput').value.trim();
+  } else {
+    SYNC_CONFIG.envId = document.getElementById('supabaseUrlInput').value.trim();
+  }
+  SYNC_CONFIG.familyCode = document.getElementById('familyCodeInput').value.trim().toLowerCase();
+  saveSyncConfig();
+  closeSettings();
+
+  if (isSyncEnabled()) {
+    if (SYNC_CONFIG.provider === 'cloudbase') {
+      showToast('⏳ 正在连接 CloudBase…');
+      cloudbaseLogin().then(function() {
+        return syncPull(false);
+      }).then(function() {
+        return syncPush();
+      }).then(function() {
+        showToast('✅ 同步已启用');
+      }).catch(function(e) {
+        showToast('⚠️ ' + (e.message || '连接失败'));
+      });
+    } else {
+      syncPull(false).then(function() {
+        syncPush().then(function() { showToast('✅ 同步已启用'); });
+      });
+    }
+  } else {
+    showToast('已清除同步配置，使用本地存储');
+  }
+}
+
+// --- CloudBase: Anonymous Login (HTTP API v1) ---
+// POST https://{envId}.api.tcloudbasegateway.com/auth/v1/signin/anonymously
+function cloudbaseLogin() {
+  if (_cloudbaseToken) return Promise.resolve(_cloudbaseToken);
+  var envId = SYNC_CONFIG.envId;
+  var loginUrl = 'https://' + envId + '.api.tcloudbasegateway.com/auth/v1/signin/anonymously';
+  var deviceId = _getDeviceId();
+  console.log('[CloudBase Login] URL:', loginUrl, 'DeviceId:', deviceId);
+  return fetch(loginUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-device-id': deviceId
+    },
+    body: JSON.stringify({})
+  }).then(function(resp) {
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return resp.json();
+  }).then(function(data) {
+    console.log('[CloudBase Login] Response:', JSON.stringify(data).substring(0, 300));
+    if (data.access_token) {
+      _cloudbaseToken = data.access_token;
+      localStorage.setItem('growth_bank_cb_token', JSON.stringify(_cloudbaseToken));
+      return _cloudbaseToken;
+    }
+    throw new Error(data.message || data.error_description || '登录返回无 token');
+  });
+}
+
+function testCloudbaseConnection(envId) {
+  var loginUrl = 'https://' + envId + '.api.tcloudbasegateway.com/auth/v1/signin/anonymously';
+  var deviceId = _getDeviceId();
+  console.log('[CloudBase Test] URL:', loginUrl);
+  fetch(loginUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-device-id': deviceId
+    },
+    body: JSON.stringify({}),
+    mode: 'cors'
+  }).then(function(resp) {
+    console.log('[CloudBase Test] HTTP:', resp.status);
+    if (!resp.ok) {
+      return resp.text().then(function(t) {
+        console.log('[CloudBase Test] Error Body:', t.substring(0, 200));
+        throw new Error('HTTP ' + resp.status + ': ' + t.substring(0, 80));
+      });
+    }
+    return resp.json();
+  }).then(function(data) {
+    console.log('[CloudBase Test] Response:', JSON.stringify(data).substring(0, 300));
+    if (data.access_token) {
+      showToast('✅ CloudBase 连接成功！匿名登录正常');
+    } else {
+      showToast('⚠️ 响应异常: ' + JSON.stringify(data).substring(0, 80));
+    }
+  }).catch(function(e) {
+    console.error('[CloudBase Test] Error:', e);
+    var msg = e.message || '';
+    if (msg.indexOf('ERR_NAME_NOT_RESOLVED') >= 0 || msg.indexOf('getaddrinfo') >= 0) {
+      showToast('❌ 域名无法解析，请检查环境 ID 是否正确');
+    } else if (msg.indexOf('Failed to fetch') >= 0) {
+      showToast('❌ 网络不通或 CORS 被拦截，请在 CloudBase 控制台→安全来源中添加当前域名');
+    } else {
+      showToast('❌ 连接失败: ' + msg.substring(0, 60));
+    }
+  });
+}
+
+// --- Test connection (supports CloudBase + LeanCloud + Supabase) ---
+function testCloudConnection() {
+  var provider = document.getElementById('cloudProviderSelect').value;
+  var testUrl, headers;
+
+  if (provider === 'cloudbase') {
+    var envId = document.getElementById('cloudbaseEnvInput').value.trim();
+    if (!envId) { showToast('⚠️ 请先填入环境 ID'); return; }
+    // Test by attempting anonymous login
+    showToast('⏳ 正在测试 CloudBase 连接…');
+    testCloudbaseConnection(envId);
+    return;
+  } else if (provider === 'leancloud') {
+    var appId = document.getElementById('leancloudIdInput').value.trim();
+    var appKey = document.getElementById('leancloudKeyInput').value.trim();
+    if (!appId || !appKey) { showToast('⚠️ 请先填入 App ID 和 App Key'); return; }
+    testUrl = 'https://api.leancloud.cn/1.1/classes/FamilyState?limit=0';
+    headers = {
+      'X-AVOS-Application-Id': appId,
+      'X-AVOS-Application-Key': appKey,
+      'Content-Type': 'application/json'
+    };
+  } else {
+    var url = document.getElementById('supabaseUrlInput').value.trim();
+    var key = document.getElementById('supabaseKeyInput2').value.trim();
+    if (!url || !key) { showToast('⚠️ 请先填入 URL 和 Anon Key'); return; }
+    testUrl = url.replace(/\/+$/, '') + '/rest/v1/family_states?select=family_code&limit=1';
+    headers = {
+      'apikey': key,
+      'Authorization': 'Bearer ' + key
+    };
+  }
+
+  showToast('⏳ 正在测试连接…');
+  console.log('[Cloud Test] Provider:', provider, 'URL:', testUrl);
+
+  fetch(testUrl, {
+    method: 'GET',
+    mode: 'cors',
+    headers: headers
+  })
+  .then(function(resp) {
+    console.log('[Cloud Test] HTTP status:', resp.status);
+    // LeanCloud returns 200 for empty query, Supabase returns 200
+    if (resp.status === 200 || resp.status === 201) {
+      showToast('✅ ' + (provider === 'leancloud' ? 'LeanCloud' : 'Supabase') + ' 连接成功！');
+    } else {
+      return resp.text().then(function(body) {
+        console.log('[Cloud Test] Error body:', body);
+        showToast('⚠️ 请求失败 (HTTP ' + resp.status + ')');
+      });
+    }
+  })
+  .catch(function(e) {
+    console.error('[Cloud Test] Fetch error:', e);
+    var msg = e.message || '';
+    if (msg.indexOf('Failed to fetch') >= 0) {
+      showToast('❌ 网络不通，请检查网络或更换服务商');
+    } else if (msg.indexOf('ERR_NAME_NOT_RESOLVED') >= 0 || msg.indexOf('getaddrinfo') >= 0) {
+      showToast('❌ 域名无法解析，请尝试切换到 LeanCloud（国内服务）');
+    } else {
+      showToast('❌ 连接失败: ' + msg.substring(0, 60));
+    }
+  });
+}
+
+// --- Pull state from cloud ---
+function handlePullRows(rows, notify) {
+  if (rows && rows.length > 0) {
+    var remoteState = rows[0].state || rows[0].state_data || null;
+    if (remoteState) {
+      state = remoteState;
+      localStorage.setItem('growth_bank_state', JSON.stringify(state));
+      refreshAll();
+      if (notify) showToast('📥 已从云端同步最新数据');
+      updateSyncUi(true);
+      return Promise.resolve();
+    }
+  }
+  // No data on server -> push local up
+  return syncPush().then(function() {
+    if (notify) showToast('📤 云端尚无数据，已上传本地数据');
+  });
+}
+
+function syncPull(notify) {
+  if (!isSyncEnabled() || syncLock) return Promise.resolve();
+  syncLock = true;
+
+  var doPull = function() {
+    if (SYNC_CONFIG.provider === 'cloudbase') {
+      // GET /database/instances/(default)/databases/(default)/collections/{name}/documents?query={ejson}&limit=1
+      var queryEjson = encodeURIComponent(JSON.stringify({ family_code: SYNC_CONFIG.familyCode }));
+      var pullUrl = cloudUrl('database/instances/(default)/databases/(default)/collections/family_states/documents') + '?query=' + queryEjson + '&limit=1';
+      return fetch(pullUrl, { method: 'GET', headers: cloudHeaders() })
+        .then(function(resp) {
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          return resp.json();
+        }).then(function(data) {
+          console.log('[syncPull CB]', JSON.stringify(data).substring(0, 300));
+          var rows = [];
+          if (data && data.documents) rows = data.documents;
+          else if (data && data.data && data.data.documents) rows = data.data.documents;
+          else if (Array.isArray(data)) rows = data;
+          return handlePullRows(rows, notify);
+        });
+    } else if (SYNC_CONFIG.provider === 'leancloud') {
+      var encodedCode = encodeURIComponent(SYNC_CONFIG.familyCode);
+      var lcPullUrl = cloudUrl('classes/FamilyState');
+      var queryParams = '?where=' + encodeURIComponent(JSON.stringify({family_code: SYNC_CONFIG.familyCode})) + '&limit=1';
+      return fetch(lcPullUrl + queryParams, { method: 'GET', headers: cloudHeaders() })
+        .then(function(resp) { if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
+        .then(function(data) { return handlePullRows(data.results || data, notify); });
+    } else {
+      // Supabase
+      var encodedCode2 = encodeURIComponent(SYNC_CONFIG.familyCode);
+      var sbPullUrl = cloudUrl('family_states') + '?family_code=eq.' + encodedCode2 + '&select=state';
+      return fetch(sbPullUrl, { method: 'GET', headers: cloudHeaders() })
+        .then(function(resp) { if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
+        .then(function(data) { return handlePullRows(Array.isArray(data) ? data : [], notify); });
+    }
+  };
+
+  var pullPromise;
+  if (SYNC_CONFIG.provider === 'cloudbase' && !_cloudbaseToken) {
+    pullPromise = cloudbaseLogin().then(doPull);
+  } else {
+    pullPromise = doPull();
+  }
+
+  return pullPromise.catch(function(e) {
+    console.error('[syncPull] Error:', e);
+    if (notify) showToast('⚠️ 同步拉取失败: ' + (e.message || '网络错误').substring(0, 40));
+    updateSyncUi(false);
+  }).finally(function() { syncLock = false; });
+}
+
+// --- Push state to cloud ---
+function syncPush() {
+  if (!isSyncEnabled() || syncLock) return Promise.resolve();
+  syncLock = true;
+
+  var doPush = function() {
+    var pushUrl, method, body, headers;
+
+    if (SYNC_CONFIG.provider === 'cloudbase') {
+      // PATCH /database/instances/(default)/databases/(default)/collections/{name}/documents
+      // Use upsert: create if not exist, update if exist
+      pushUrl = cloudUrl('database/instances/(default)/databases/(default)/collections/family_states/documents');
+      method = 'PATCH';
+      body = JSON.stringify({
+        query: { family_code: SYNC_CONFIG.familyCode },
+        data: {
+          family_code: SYNC_CONFIG.familyCode,
+          state: state,
+          updated_at: new Date().toISOString()
+        },
+        multi: false,
+        upsert: true
+      });
+      headers = cloudHeaders();
+    } else if (SYNC_CONFIG.provider === 'leancloud') {
+      pushUrl = cloudUrl('classes/FamilyState');
+      method = 'POST';
+      body = JSON.stringify({
+        family_code: SYNC_CONFIG.familyCode,
+        state: state,
+        updated_at: new Date().toISOString()
+      });
+      headers = Object.assign({}, cloudHeaders());
+    } else {
+      // Supabase
+      pushUrl = cloudUrl('family_states');
+      method = 'POST';
+      body = JSON.stringify({
+        family_code: SYNC_CONFIG.familyCode,
+        state: state,
+        updated_at: new Date().toISOString()
+      });
+      headers = Object.assign({}, cloudHeaders(), {
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      });
+    }
+
+    return fetch(pushUrl, {
+      method: method,
+      headers: headers,
+      body: body
+    }).then(function(resp) {
+      console.log('[syncPush] HTTP', resp.status, 'Provider:', SYNC_CONFIG.provider);
+      if (SYNC_CONFIG.provider === 'cloudbase') {
+        return resp.json().then(function(d) {
+          console.log('[syncPush CB]', JSON.stringify(d).substring(0, 300));
+          if (d.updated !== undefined || d.matched !== undefined || resp.ok) {
+            updateSyncUi(true);
+          } else {
+            throw new Error('CloudBase error: ' + (d.message || JSON.stringify(d).substring(0,100)));
+          }
+        });
+      }
+      if (resp.status === 200 || resp.status === 201) {
+        updateSyncUi(true);
+      } else {
+        throw new Error('HTTP ' + resp.status);
+      }
+    });
+  };
+
+  var pushPromise;
+  if (SYNC_CONFIG.provider === 'cloudbase' && !_cloudbaseToken) {
+    pushPromise = cloudbaseLogin().then(doPush);
+  } else {
+    pushPromise = doPush();
+  }
+
+  return pushPromise.catch(function(e) {
+    console.error('[syncPush] Error:', e);
+    updateSyncUi(false);
+  }).finally(function() { syncLock = false; });
+}
+
+// --- Debounced auto-push ---
+function autoSyncPush() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(function() {
+    if (isSyncEnabled()) syncPush();
+  }, 500);
+}
+
+// --- Sync indicator ---
+function updateSyncUi(online) {
+  var dot = document.getElementById('syncDot');
+  var providerMap = { cloudbase: 'CloudBase', leancloud: 'LeanCloud', supabase: 'Supabase' };
+  var providerName = providerMap[SYNC_CONFIG.provider] || '';
+  if (!isSyncEnabled()) {
+    dot.textContent = '⚪';
+    dot.title = '未配置同步';
+    dot.className = 'sync-dot';
+    return;
+  }
+  if (online === true) {
+    dot.textContent = '🟢';
+    dot.title = '已同步 (' + providerName + ')';
+    dot.className = 'sync-dot synced';
+  } else if (online === false) {
+    dot.textContent = '🔴';
+    dot.title = '同步失败，检查网络或配置';
+    dot.className = 'sync-dot';
+  } else {
+    dot.textContent = '🟡';
+    dot.title = '等待同步...';
+    dot.className = 'sync-dot';
+  }
+}
+
+function startAutoSync() {
+  setInterval(function() {
+    if (isSyncEnabled() && !syncLock) syncPull();
+  }, 30000);
+}
+
+let state = loadState();
+
+// Reset daily completions if new day
+const todayKey = getDateKey(new Date());
+if (state.todayDate !== todayKey) {
+  state.completedToday = {};
+  state.todayDate = todayKey;
+  saveState(state);
+}
+
+// Reset weekly stats if new week
+const thisMonday = getMonday(new Date());
+if (state.weekStart !== thisMonday) {
+  state.weekStart = thisMonday;
+  state.review = { best: '', hard: '', parent: '', support: '' };
+  // Reset week score tracking (we'll calculate from scratch)
+  saveState(state);
+}
+
+// ============ UTILS ============
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function updateAllStats() {
+  // Total score
+  document.getElementById('totalScore').textContent = state.totalScore;
+  // Today done
+  const todayDone = Object.keys(state.completedToday).length;
+  document.getElementById('statDone').textContent = todayDone;
+  // Dims lit
+  const dimsLit = new Set();
+  Object.keys(state.completedToday).forEach(tid => {
+    const t = state.tasks.find(x => x.id === tid);
+    if (t) dimsLit.add(t.cat);
+  });
+  document.getElementById('statDims').textContent = `${dimsLit.size}/5`;
+  // Week score (calc from state - simplified: use totalScore)
+  document.getElementById('statWeek').textContent = state.totalScore;
+}
+
+// ============ TOP DASHBOARD ============
+function renderDashboard() {
+  renderDashTasks();
+  renderDashAccount();
+  renderDashDeposit();
+}
+
+function renderDashTasks() {
+  const container = document.getElementById('dashTaskList');
+  const emptyDiv = document.getElementById('dashTasksEmpty');
+  const incompleteTasks = state.tasks.filter(t => !state.completedToday[t.id]);
+  
+  if (state.tasks.length === 0) {
+    container.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:8px 0;text-align:center">暂无任务，去打卡页添加吧</div>';
+    emptyDiv.style.display = 'none';
+    return;
+  }
+  
+  if (incompleteTasks.length === 0) {
+    container.innerHTML = '';
+    emptyDiv.style.display = 'block';
+    return;
+  }
+  
+  emptyDiv.style.display = 'none';
+  // Show top 3 incomplete tasks
+  const showTasks = incompleteTasks.slice(0, 3);
+  container.innerHTML = showTasks.map(t => `
+    <div class="dash-task-item" onclick="event.stopPropagation();dashToggleTask('${t.id}')">
+      <div class="dash-task-dot"></div>
+      <span class="dash-task-name">${t.name}</span>
+      <span class="dash-task-pts">+${t.pts}</span>
+    </div>
+  `).join('');
+  // If more tasks remaining, show hint
+  if (incompleteTasks.length > 3) {
+    container.innerHTML += `<div style="font-size:10px;color:var(--text-muted);text-align:center;margin-top:2px">还有 ${incompleteTasks.length - 3} 项…</div>`;
+  }
+}
+
+function dashToggleTask(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  state.completedToday[taskId] = true;
+  state.totalScore += task.pts;
+  saveState(state);
+  refreshAll();
+  showToast(`✨ +${task.pts}分 · ${task.name} 打卡成功！`);
+}
+
+function renderDashAccount() {
+  document.getElementById('dashScore').textContent = state.totalScore;
+}
+
+function renderDashDeposit() {
+  const todayDone = Object.keys(state.completedToday).length;
+  const totalTasks = state.tasks.length;
+  const pct = totalTasks > 0 ? Math.min(100, Math.round((todayDone / totalTasks) * 100)) : 0;
+  
+  // Calculate today's earned points
+  let todayPts = 0;
+  Object.keys(state.completedToday).forEach(tid => {
+    const t = state.tasks.find(x => x.id === tid);
+    if (t) todayPts += t.pts;
+  });
+  
+  document.getElementById('dashTodayPts').textContent = `${todayPts}分`;
+  document.getElementById('dashDepositFill').style.width = `${pct}%`;
+  
+  const textEl = document.getElementById('dashDepositText');
+  const tagEl = document.getElementById('dashDepositTag');
+  const card = document.querySelector('.dash-deposit');
+  
+  if (todayDone === 0) {
+    textEl.textContent = '完成一项任务，存入成长能量';
+    tagEl.textContent = '今日存入 0 项';
+    card.classList.remove('dash-deposit-active');
+  } else if (pct < 50) {
+    textEl.textContent = `已存入 ${todayDone} 项成长能量`;
+    tagEl.textContent = `今日存入 ${todayDone} 项 | ${pct}%`;
+    card.classList.add('dash-deposit-active');
+  } else if (pct < 100) {
+    textEl.textContent = '进步很明显，继续加油！';
+    tagEl.textContent = `今日存入 ${todayDone} 项 | ${pct}%`;
+    card.classList.add('dash-deposit-active');
+  } else {
+    textEl.textContent = '🏆 今天全部完成了！';
+    tagEl.textContent = `今日存入 ${todayDone}/${totalTasks} 项`;
+    card.classList.remove('dash-deposit-active');
+  }
+}
+
+// ============ GROWTH MAP ============
+function renderGrowthMap() {
+  const container = document.getElementById('growthMap');
+  container.innerHTML = DIMENSIONS.map((dim, i) => {
+    const dimTasks = state.tasks.filter(t => t.cat === dim.id);
+    const doneToday = dimTasks.filter(t => state.completedToday[t.id]).length;
+    const total = dimTasks.length;
+    const stars = doneToday > 0 ? '⭐'.repeat(Math.min(doneToday, 5)) : '☆'.repeat(5);
+    const active = doneToday > 0;
+    return `
+      <div class="dim-card dim-${dim.id} ${active ? 'active' : ''}" onclick="openDimTasks('${dim.id}')">
+        <div class="dim-icon">${dim.icon}</div>
+        <div class="dim-name">${dim.name}</div>
+        <div class="dim-desc">${dim.desc}</div>
+        <div class="dim-progress">
+          <span class="dim-stars">${stars}</span>
+          <span class="dim-count">${doneToday}/${total} 项今日点亮</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openDimTasks(catId) {
+  const dim = DIMENSIONS.find(d => d.id === catId);
+  const dimTasks = state.tasks.filter(t => t.cat === catId);
+  const html = `
+    <h3>${dim.icon} ${dim.name} · 专属任务</h3>
+    <div class="task-popup-tasks">
+      ${dimTasks.map(t => {
+        const done = state.completedToday[t.id];
+        return `<div class="task-popup-item ${done ? 'completed' : ''}" onclick="toggleTask('${t.id}', event)">
+          <span>${done ? '✅ ' : '⬜ '}${t.name}</span>
+          <span class="task-popup-pts">+${t.pts}分</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="modal-btns" style="margin-top:16px">
+      <button class="btn-confirm" style="flex:1" onclick="closeModal()">完成</button>
+    </div>`;
+  showModal(html);
+}
+
+// ============ CHECK-IN ============
+let currentFilter = 'all';
+let editMode = false;
+
+function toggleEditMode() {
+  editMode = !editMode;
+  const toggle = document.getElementById('editToggle');
+  const page = document.getElementById('page-checkin');
+  if (editMode) {
+    toggle.textContent = '✅ 完成';
+    toggle.classList.add('active');
+    page.classList.add('edit-mode');
+  } else {
+    toggle.textContent = '✏️ 编辑';
+    toggle.classList.remove('active');
+    page.classList.remove('edit-mode');
+  }
+  renderTaskList();
+}
+
+function renderCheckinFilters() {
+  const container = document.getElementById('checkinFilters');
+  const filters = [{ id: 'all', name: '全部' }, ...DIMENSIONS.map(d => ({ id: d.id, name: d.name }))];
+  container.innerHTML = filters.map(f =>
+    `<div class="filter-chip ${f.id === currentFilter ? 'active' : ''}" onclick="setFilter('${f.id}')">${f.name}</div>`
+  ).join('');
+}
+
+function setFilter(id) {
+  currentFilter = id;
+  renderCheckinFilters();
+  renderTaskList();
+}
+
+function renderTaskList() {
+  const container = document.getElementById('taskList');
+  let tasks = state.tasks;
+  if (currentFilter !== 'all') tasks = tasks.filter(t => t.cat === currentFilter);
+  if (tasks.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted)">这个分类还没有任务哦~</div>';
+    return;
+  }
+  container.innerHTML = tasks.map(t => {
+    const done = !!state.completedToday[t.id];
+    const clickAction = editMode
+      ? `event.stopPropagation();openEditTask('${t.id}')`
+      : `toggleTask('${t.id}')`;
+    return `
+      <div class="task-item ${done ? 'done' : ''}" onclick="${clickAction}">
+        <div class="task-check">${done ? '✓' : ''}</div>
+        <div class="task-info">
+          <div class="task-name">${t.name}</div>
+          <div class="task-desc">${t.desc}</div>
+        </div>
+        <span class="task-cat ${CAT_CLASSES[t.cat]}">${CAT_NAMES[t.cat]}</span>
+        <span class="task-pts">+${t.pts}分</span>
+        <div class="edit-actions">
+          <button class="edit-action-btn edit-btn" onclick="event.stopPropagation();openEditTask('${t.id}')" title="编辑">✏️</button>
+          <button class="edit-action-btn del-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="删除">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleTask(taskId, event) {
+  if (editMode) return;
+  if (event) event.stopPropagation();
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  if (state.completedToday[taskId]) {
+    delete state.completedToday[taskId];
+    state.totalScore = Math.max(0, state.totalScore - task.pts);
+    saveState(state);
+    refreshAll();
+    return;
+  }
+
+  state.completedToday[taskId] = true;
+  state.totalScore += task.pts;
+  saveState(state);
+  refreshAll();
+  showToast(`✨ +${task.pts}分 · ${task.name} 打卡成功！`);
+}
+
+function generateTaskId() {
+  return 't' + Date.now() + Math.random().toString(36).slice(2, 6);
+}
+
+function openAddTask() {
+  const dimOptions = DIMENSIONS.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+  const html = `
+    <h3>➕ 添加新任务</h3>
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">任务名称</label>
+    <input id="editTaskName" placeholder="例如：背诵一首古诗">
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">任务描述</label>
+    <input id="editTaskDesc" placeholder="例如：从唐诗三百首中选一首背诵">
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">所属维度</label>
+    <select id="editTaskCat">${dimOptions}</select>
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">积分奖励</label>
+    <input id="editTaskPts" type="number" value="2" placeholder="积分" min="1" max="100">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-confirm" onclick="saveNewTask()">添加</button>
+    </div>`;
+  showModal(html);
+}
+
+function saveNewTask() {
+  const name = document.getElementById('editTaskName').value.trim();
+  const desc = document.getElementById('editTaskDesc').value.trim();
+  const cat = document.getElementById('editTaskCat').value;
+  const pts = parseInt(document.getElementById('editTaskPts').value) || 2;
+  if (!name) { showToast('请输入任务名称'); return; }
+  state.tasks.push({ id: generateTaskId(), cat, name, desc, pts });
+  saveState(state);
+  closeModal();
+  refreshAll();
+  showToast('✅ 新任务已添加！');
+}
+
+function openEditTask(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const dimOptions = DIMENSIONS.map(d =>
+    `<option value="${d.id}" ${d.id === task.cat ? 'selected' : ''}>${d.name}</option>`
+  ).join('');
+  const html = `
+    <h3>✏️ 编辑任务</h3>
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">任务名称</label>
+    <input id="editTaskName" value="${escapeHtml(task.name)}" placeholder="任务名称">
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">任务描述</label>
+    <input id="editTaskDesc" value="${escapeHtml(task.desc)}" placeholder="任务描述">
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">所属维度</label>
+    <select id="editTaskCat">${dimOptions}</select>
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">积分奖励</label>
+    <input id="editTaskPts" type="number" value="${task.pts}" placeholder="积分" min="1" max="100">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="deleteTask('${taskId}')">🗑️ 删除</button>
+      <button class="btn-confirm" onclick="saveTaskEdit('${taskId}')">💾 保存</button>
+    </div>`;
+  showModal(html);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function saveTaskEdit(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const name = document.getElementById('editTaskName').value.trim();
+  const desc = document.getElementById('editTaskDesc').value.trim();
+  const cat = document.getElementById('editTaskCat').value;
+  const pts = parseInt(document.getElementById('editTaskPts').value) || 1;
+  if (!name) { showToast('请输入任务名称'); return; }
+  task.name = name;
+  task.desc = desc;
+  task.cat = cat;
+  task.pts = pts;
+  saveState(state);
+  closeModal();
+  refreshAll();
+  showToast('✅ 任务已更新！');
+}
+
+function deleteTask(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  // Remove from completed if present
+  if (state.completedToday[taskId]) {
+    state.totalScore = Math.max(0, state.totalScore - task.pts);
+    delete state.completedToday[taskId];
+  }
+  state.tasks = state.tasks.filter(t => t.id !== taskId);
+  saveState(state);
+  closeModal();
+  refreshAll();
+  showToast('🗑️ 任务已删除');
+}
+
+// ============ WEEKLY REVIEW ============
+function saveReview() {
+  state.review = {
+    best: document.getElementById('reviewBest').value,
+    hard: document.getElementById('reviewHard').value,
+    parent: document.getElementById('reviewParent').value,
+    support: document.getElementById('reviewSupport').value,
+  };
+  saveState(state);
+  showToast('📝 复盘已保存！');
+}
+
+function loadReviewIntoForm() {
+  document.getElementById('reviewBest').value = state.review.best || '';
+  document.getElementById('reviewHard').value = state.review.hard || '';
+  document.getElementById('reviewParent').value = state.review.parent || '';
+  document.getElementById('reviewSupport').value = state.review.support || '';
+  // Stats
+  const todayDone = Object.keys(state.completedToday).length;
+  const dimsLit = new Set();
+  Object.keys(state.completedToday).forEach(tid => {
+    const t = state.tasks.find(x => x.id === tid);
+    if (t) dimsLit.add(t.cat);
+  });
+  document.getElementById('rvTasks').textContent = todayDone;
+  document.getElementById('rvScore').textContent = state.totalScore;
+  document.getElementById('rvDims').textContent = dimsLit.size;
+}
+
+// ============ REWARDS ============
+function renderRewards() {
+  const container = document.getElementById('rewardsList');
+  const tiers = [
+    { key: 'small', ...state.rewards.small },
+    { key: 'mid', ...state.rewards.mid },
+    { key: 'big', ...state.rewards.big },
+  ];
+  container.innerHTML = tiers.map(tier => `
+    <div class="reward-card">
+      <div class="reward-badge ${tier.cls}">${tier.label}</div>
+      <div class="reward-title">${tier.label.split('·')[1]?.trim() || tier.label}</div>
+      <div class="reward-items">
+        ${tier.items.map((item, i) => `
+          <div class="reward-item">
+            <span class="ri-name">🎯 ${item.name}</span>
+            <span class="ri-action" onclick="editReward('${tier.key}', ${i})">✏️ 修改</span>
+          </div>
+        `).join('')}
+      </div>
+      <button class="btn-primary" style="width:100%;margin:12px 0 0;font-size:13px;padding:10px"
+        onclick="addRewardItem('${tier.key}')">+ 添加自定义奖励</button>
+    </div>
+  `).join('');
+}
+
+function editReward(tier, idx) {
+  const item = state.rewards[tier].items[idx];
+  const html = `
+    <h3>✏️ 修改奖励内容</h3>
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">奖励名称</label>
+    <input id="editRewardName" value="${item.name}" placeholder="输入奖励名称">
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">所需积分</label>
+    <input id="editRewardPts" type="number" value="${item.pts}" placeholder="积分">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="deleteRewardItem('${tier}', ${idx})">删除</button>
+      <button class="btn-confirm" onclick="saveRewardEdit('${tier}', ${idx})">保存</button>
+    </div>`;
+  showModal(html);
+}
+
+function saveRewardEdit(tier, idx) {
+  const name = document.getElementById('editRewardName').value.trim();
+  const pts = parseInt(document.getElementById('editRewardPts').value) || 10;
+  if (!name) { showToast('请输入奖励名称'); return; }
+  state.rewards[tier].items[idx] = { name, pts };
+  saveState(state);
+  closeModal();
+  renderRewards();
+  showToast('奖励已更新！');
+}
+
+function deleteRewardItem(tier, idx) {
+  state.rewards[tier].items.splice(idx, 1);
+  saveState(state);
+  closeModal();
+  renderRewards();
+  showToast('奖励已删除');
+}
+
+function addRewardItem(tier) {
+  const ptsMap = { small: 10, mid: 30, big: 60 };
+  const html = `
+    <h3>➕ 添加自定义奖励</h3>
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">奖励名称</label>
+    <input id="newRewardName" placeholder="例如：去游泳馆玩一天">
+    <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">所需积分</label>
+    <input id="newRewardPts" type="number" value="${ptsMap[tier]}" placeholder="积分">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-confirm" onclick="saveNewReward('${tier}')">添加</button>
+    </div>`;
+  showModal(html);
+}
+
+function saveNewReward(tier) {
+  const name = document.getElementById('newRewardName').value.trim();
+  const pts = parseInt(document.getElementById('newRewardPts').value) || 10;
+  if (!name) { showToast('请输入奖励名称'); return; }
+  state.rewards[tier].items.push({ name, pts });
+  saveState(state);
+  closeModal();
+  renderRewards();
+  showToast('自定义奖励已添加！');
+}
+
+// ============ PORTFOLIO ============
+function handleFileUpload(event) {
+  const files = event.target.files;
+  if (!files.length) return;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      state.portfolio.push({
+        id: Date.now() + Math.random(),
+        type: file.type.startsWith('video/') ? 'video' : 'image',
+        data: e.target.result,
+        name: file.name,
+        date: getDateKey(new Date()),
+      });
+      saveState(state);
+      renderGallery();
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+  showToast(`📸 已上传 ${files.length} 个作品`);
+}
+
+function deletePortfolioItem(id) {
+  state.portfolio = state.portfolio.filter(p => p.id !== id);
+  saveState(state);
+  renderGallery();
+  showToast('作品已删除');
+}
+
+function renderGallery() {
+  const container = document.getElementById('gallery');
+  if (state.portfolio.length === 0) {
+    container.innerHTML = '<div class="empty-gallery"><span class="empty-icon">🖼️</span>还没有作品，开始记录吧！</div>';
+    return;
+  }
+  container.innerHTML = state.portfolio.map(p => `
+    <div class="gallery-item" onclick="previewPortfolio('${p.id}')">
+      ${p.type === 'video'
+        ? `<video src="${p.data}" muted></video>`
+        : `<img src="${p.data}" alt="${p.name}" loading="lazy">`}
+      <button class="delete-btn" onclick="event.stopPropagation();deletePortfolioItem('${p.id}')">×</button>
+    </div>
+  `).join('');
+}
+
+function previewPortfolio(id) {
+  const item = state.portfolio.find(p => p.id == id);
+  if (!item) return;
+  const html = item.type === 'video'
+    ? `<h3>🎬 ${item.name}</h3><video src="${item.data}" controls style="width:100%;max-height:60vh;border-radius:12px"></video>`
+    : `<h3>📷 ${item.name}</h3><img src="${item.data}" style="width:100%;max-height:60vh;object-fit:contain;border-radius:12px">`;
+  const fullHtml = html + `<div style="text-align:center;margin-top:8px;font-size:12px;color:var(--text-muted)">${item.date}</div>
+    <div class="modal-btns" style="margin-top:12px"><button class="btn-cancel" style="flex:1" onclick="closeModal()">关闭</button></div>`;
+  showModal(fullHtml);
+}
+
+// ============ MODAL ============
+function showModal(html) {
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('modalOverlay').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').style.display = 'none';
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ============ PAGE SWITCHING ============
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.getElementById(`page-${page}`).classList.add('visible');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+  if (page === 'review') loadReviewIntoForm();
+  if (page === 'rewards') renderRewards();
+  if (page === 'map') renderGrowthMap();
+  if (page === 'checkin') {
+    renderCheckinFilters(); renderTaskList();
+    // Re-apply edit mode class
+    if (editMode) document.getElementById('page-checkin').classList.add('edit-mode');
+  }
+  if (page === 'portfolio') renderGallery();
+  renderDashboard();
+}
+
+// ============ REFRESH ALL ============
+function refreshAll() {
+  updateAllStats();
+  renderDashboard();
+  const currentPage = document.querySelector('.page.visible')?.id?.replace('page-', '');
+  if (currentPage === 'map') renderGrowthMap();
+  if (currentPage === 'checkin') renderTaskList();
+  if (currentPage === 'review') loadReviewIntoForm();
+}
+
+// ============ INIT ============
+function init() {
+  loadSyncConfig();
+  updateAllStats();
+  renderDashboard();
+  renderGrowthMap();
+  renderCheckinFilters();
+  renderTaskList();
+  renderRewards();
+  renderGallery();
+  loadReviewIntoForm();
+
+  // Pull latest from Supabase on startup if configured
+  if (isSyncEnabled()) {
+    syncPull(false);
+  }
+  // Start periodic auto-sync
+  startAutoSync();
+}
+
+init();
+</script>
+<button class="settings-fab" id="settingsFab" onclick="openSettings()" title="家庭同步设置">⚙️</button>
+</body>
+</html>
