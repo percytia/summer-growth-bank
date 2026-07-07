@@ -1137,9 +1137,6 @@ body {
       • ✅ 数据存为私有 Gist，只有你能访问<br>
       • ✅ 无需注册额外服务，你已有 GitHub 账号<br>
       • ⚠️ Token 存在浏览器本地存储中，不会上传到任何服务器
-    </div>
-  </div>
-</div>
       • 无需代理/VPN，数据安全合规
     </div>
   </div>
@@ -1407,10 +1404,6 @@ function syncPush() {
     if (existingGist) {
       // Update existing gist
       console.log('[syncPush] Updating gist:', existingGist.id);
-      return ghApi('PATCH', '/gists/' + existingGist.id, {
-        files: {}
-      })[fname] = undefined; // This won't work, use proper format
-
       return ghApi('PATCH', '/gists/' + existingGist.id, {
         description: '暑期成长银行 - 家庭数据 (' + SYNC_CONFIG.familyCode + ')',
         files: (function() { var o = {}; o[fname] = { content: stateJson }; return o; })()
