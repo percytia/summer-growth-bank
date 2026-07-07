@@ -1096,64 +1096,23 @@ body {
 <!-- Settings Modal -->
 <div class="modal-overlay" id="settingsOverlay" style="display:none">
   <div class="modal" style="max-width:420px;max-height:90vh;overflow-y:auto">
-    <div class="modal-title">☁️ 云同步设置</div>
-    <div class="modal-desc">配置云数据库后，所有设备可共享同一个家庭数据。不同网络、不同地点都能实时同步。</div>
+    <div class="modal-title">☁️ 云同步设置（GitHub）</div>
+    <div class="modal-desc">使用 GitHub Gist 私有存储实现跨设备数据同步。天然无 CORS，完全免费，无需额外注册。</div>
 
     <div class="settings-field">
-      <label>🔌 云服务提供商</label>
-      <select id="cloudProviderSelect" onchange="onProviderChange()" style="width:100%;padding:12px;border:2px solid var(--mauve-200);border-radius:12px;font-size:14px;font-family:inherit;background:var(--mauve-50);color:var(--text-primary);appearance:none;-webkit-appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23857470' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer">
-        <option value="cloudbase">腾讯云 CloudBase（国内推荐）</option>
-        <option value="supabase">Supabase（需代理）</option>
-        <option value="leancloud">LeanCloud（已停服）</option>
-      </select>
-    </div>
-
-    <!-- CloudBase Fields (default shown) -->
-    <div id="cloudbaseFields">
-      <div class="settings-field">
-        <label>🏗️ CloudBase 环境 ID</label>
-        <input type="text" id="cloudbaseEnvInput" placeholder="例如：growth-bank-xxx">
-        <div class="hint">在腾讯云 CloudBase 控制台 → 环境概览 中复制</div>
-      </div>
-      <div class="hint" style="margin-top:4px;color:var(--mauve-500)">✓ 匿名登录无需密钥，填写环境 ID 即可</div>
-    </div>
-
-    <!-- LeanCloud Fields -->
-    <div id="leancloudFields" style="display:none">
-      <div class="settings-field">
-        <label>🆔 LeanCloud App ID</label>
-        <input type="text" id="leancloudIdInput" placeholder="例如：xxxxxxxxxxxxxxx">
-        <div class="hint">LeanCloud 已停服，无法注册新账号</div>
-      </div>
-      <div class="settings-field">
-        <label>🔑 LeanCloud App Key</label>
-        <input type="text" id="leancloudKeyInput" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
-        <div class="hint">同上页面中的 Master Key 或 App Key 均可</div>
-      </div>
-    </div>
-
-    <!-- Supabase Fields -->
-    <div id="supabaseFields" style="display:none">
-      <div class="settings-field">
-        <label>🔗 Supabase 项目 URL</label>
-        <input type="text" id="supabaseUrlInput" placeholder="https://xxxxxxxxxxxx.supabase.co">
-        <div class="hint">在 Supabase 控制台 → Settings → API 中复制</div>
-      </div>
-      <div class="settings-field">
-        <label>🔑 Anon Key（公开密钥）</label>
-        <input type="text" id="supabaseKeyInput2" placeholder="eyJhbGciOiJIUzI1NiIs...">
-        <div class="hint" style="color:#A07D74">此密钥可公开，仅用于前端读写的安全标识</div>
-      </div>
+      <label>🔑 GitHub Personal Access Token</label>
+      <input type="password" id="ghTokenInput" placeholder="github_pat_xxxxxxxxxxxx" autocomplete="off">
+      <div class="hint">在 <b>GitHub → Settings → Developer settings → Fine-grained tokens</b> 中生成，需要 <code>gist</code> 权限</div>
     </div>
 
     <div class="settings-field">
       <label>👨‍👩‍👧‍👦 家庭码</label>
       <input type="text" id="familyCodeInput" placeholder="例如 percytia2026" maxlength="30">
-      <div class="hint">所有设备使用相同的家庭码，数据即可互通</div>
+      <div class="hint">所有设备使用相同的家庭码，数据即可互通。每个家庭自动创建一个私有 Gist</div>
     </div>
 
     <div class="settings-actions" style="margin-bottom:12px">
-      <button class="btn-cancel" onclick="testCloudConnection()" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">🔍 测试连接</button>
+      <button class="btn-cancel" onclick="testGithubConnection()" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">🔍 测试连接</button>
       <button class="btn-cancel" onclick="syncPull(true)" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">📥 手动拉取</button>
     </div>
 
@@ -1163,21 +1122,24 @@ body {
     </div>
 
     <div class="setup-guide" id="setupGuide">
-      <strong>📖 如何配置 CloudBase（国内推荐）：</strong><br>
-      1. 打开 <a href="https://console.cloud.tencent.com/tcb" target="_blank" style="color:var(--mauve-600)">腾讯云 CloudBase 控制台</a>，登录腾讯云账号<br>
-      2. 新建环境 → 选「免费体验版」→ 数据库选「云数据库（默认）」<br>
-      3. 进入环境 → 设置 → 登录授权 → 开启「<b>匿名登录</b>」<br>
-      4. 回到「环境概览」，复制「环境 ID」填入上方<br>
-      5. <b>必须配置安全来源</b>：进入 环境 → 安全来源 → 添加你的网页域名<br>
+      <strong>📖 如何获取 GitHub Token：</strong><br>
+      1. 打开 <a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color:var(--mauve-600)">github.com/settings/tokens</a><br>
+      2. 点「<b>Generate new token</b>」（Fine-grained）<br>
+      3. Token name 填：<code>growth-bank-sync</code><br>
+      4. Expiration 选：<code>90 days</code> 或更长<br>
+      5. Repository access：<code>Only select repositories</code> → 不选任何仓库（或选 public）<br>
+      6. <b>Permissions → Account permissions → Gist</b>：选 <b>Read and write</b><br>
+      7. 点 Generate token，复制生成的 token 填入上方<br>
       <br>
-      <strong>⚠️ 部署到 GitHub Pages 后务必操作：</strong><br>
-      • 将 <code>jesscia1988.github.io</code> 添加到「安全来源」列表<br>
-      • 本地测试时加上 <code>localhost</code> 和 <code>127.0.0.1</code>
-      <br><br>
-      <strong>💡 为什么选 CloudBase？</strong><br>
-      • 腾讯云国内服务器，稳定可访问<br>
-      • 免费额度：每月 2GB 存储 + 5GB CDN + 100万次调用<br>
-      • 匿名登录 + 纯前端 fetch，无需 SDK 加载<br>
+      <strong>💡 为什么用 GitHub Gist？</strong><br>
+      • ✅ 天然无 CORS（github.io 和 api.github.com 同源）<br>
+      • ✅ 完全免费，无限存储<br>
+      • ✅ 数据存为私有 Gist，只有你能访问<br>
+      • ✅ 无需注册额外服务，你已有 GitHub 账号<br>
+      • ⚠️ Token 存在浏览器本地存储中，不会上传到任何服务器
+    </div>
+  </div>
+</div>
       • 无需代理/VPN，数据安全合规
     </div>
   </div>
@@ -1261,359 +1223,174 @@ function saveState(state) {
 function getDateKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function getMonday(d) { const n = new Date(d); n.setDate(n.getDate() - ((n.getDay() + 6) % 7)); n.setHours(0,0,0,0); return n.toISOString().split('T')[0]; }
 
-// ============ CLOUD SYNC (Tencent CloudBase REST API) ============
-// 支持多后端：CloudBase（国内推荐）/ Supabase（需代理）/ LeanCloud（已停服）
-// CloudBase 使用 HTTP API v1：https://docs.cloudbase.net/http-api/basic/overview
-var SYNC_CONFIG = { provider: 'cloudbase', envId: '', familyCode: '' };
+// ============ CLOUD SYNC (GitHub Gist API) ============
+// 使用 GitHub Gist 私有存储实现跨设备数据同步
+// 天然无 CORS（github.io → api.github.com 同源），完全免费，无需额外注册
+var SYNC_CONFIG = { token: '', familyCode: '' };
 var syncTimer = null;
 var syncLock = false;
-var _cloudbaseToken = '';       // cached anonymous access_token
-var _cloudbaseDeviceId = '';    // cached device-id for anonymous login
-
-// --- CloudBase: get or create device-id ---
-function _getDeviceId() {
-  if (_cloudbaseDeviceId) return _cloudbaseDeviceId;
-  try { _cloudbaseDeviceId = localStorage.getItem('growth_bank_device_id'); } catch(e) {}
-  if (!_cloudbaseDeviceId) {
-    _cloudbaseDeviceId = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
-    try { localStorage.setItem('growth_bank_device_id', _cloudbaseDeviceId); } catch(e) {}
-  }
-  return _cloudbaseDeviceId;
-}
-
-// --- Low-level REST helpers ---
-function cloudHeaders() {
-  if (SYNC_CONFIG.provider === 'cloudbase') {
-    var h = { 'Content-Type': 'application/json' };
-    if (_cloudbaseToken) h['Authorization'] = 'Bearer ' + _cloudbaseToken;
-    return h;
-  } else if (SYNC_CONFIG.provider === 'leancloud') {
-    return {
-      'X-AVOS-Application-Id': SYNC_CONFIG.envId,
-      'Content-Type': 'application/json'
-    };
-  } else {
-    // Supabase fallback
-    return {
-      'apikey': SYNC_CONFIG.envId,
-      'Authorization': 'Bearer ' + SYNC_CONFIG.envId,
-      'Content-Type': 'application/json'
-    };
-  }
-}
-
-function cloudUrl(path) {
-  if (SYNC_CONFIG.provider === 'cloudbase') {
-    // CloudBase HTTP API: https://{envId}.api.tcloudbasegateway.com/v1/{path}
-    return 'https://' + SYNC_CONFIG.envId + '.api.tcloudbasegateway.com/v1/' + path;
-  } else if (SYNC_CONFIG.provider === 'leancloud') {
-    return 'https://api.leancloud.cn/1.1/' + path;
-  } else {
-    return (SYNC_CONFIG.envId.replace(/\/+$/, '')) + '/rest/v1/' + path;
-  }
-}
+var _gistId = ''; // cached gist ID for this family
 
 // --- Config load / save ---
 function loadSyncConfig() {
   try {
     var raw = localStorage.getItem('growth_bank_sync_config');
     if (raw) SYNC_CONFIG = JSON.parse(raw);
-  } catch(e) { SYNC_CONFIG = { provider: 'cloudbase', envId: '', familyCode: '' }; }
-  // Migrate old formats
-  if (!SYNC_CONFIG.envId && SYNC_CONFIG.supabaseUrl) {
-    SYNC_CONFIG.provider = 'supabase';
-    SYNC_CONFIG.envId = SYNC_CONFIG.supabaseUrl;
+  } catch(e) { SYNC_CONFIG = { token: '', familyCode: '' }; }
+  // Migrate old formats from CloudBase/Supabase/LeanCloud
+  if (SYNC_CONFIG.provider && !SYNC_CONFIG.token) {
+    if (SYNC_CONFIG.envId) {
+      // Old format had provider + envId, keep familyCode
+      var oldFamily = SYNC_CONFIG.familyCode || '';
+      SYNC_CONFIG = { token: '', familyCode: oldFamily };
+    }
   }
-  if (!SYNC_CONFIG.envId && SYNC_CONFIG.appId) {
-    SYNC_CONFIG.provider = 'leancloud';
-    SYNC_CONFIG.envId = SYNC_CONFIG.appId;
-  }
-  if (!SYNC_CONFIG.provider) SYNC_CONFIG.provider = 'cloudbase';
-  // Restore cached token
-  try { _cloudbaseToken = JSON.parse(localStorage.getItem('growth_bank_cb_token') || '""'); } catch(e) { _cloudbaseToken = ''; }
+  // Restore cached gist ID
+  try { _gistId = localStorage.getItem('growth_bank_gist_id') || ''; } catch(e) {}
   updateSyncUi();
 }
 
 function saveSyncConfig() {
   localStorage.setItem('growth_bank_sync_config', JSON.stringify(SYNC_CONFIG));
+  if (_gistId) localStorage.setItem('growth_bank_gist_id', _gistId);
   updateSyncUi();
 }
 
 function isSyncEnabled() {
-  if (SYNC_CONFIG.provider === 'cloudbase') {
-    return !!(SYNC_CONFIG.envId && SYNC_CONFIG.familyCode);
-  }
-  return !!(SYNC_CONFIG.provider && SYNC_CONFIG.envId && SYNC_CONFIG.familyCode);
+  return !!(SYNC_CONFIG.token && SYNC_CONFIG.familyCode);
 }
 
-// --- Settings UI ---
-function openSettings() {
-  document.getElementById('cloudProviderSelect').value = SYNC_CONFIG.provider || 'cloudbase';
-  document.getElementById('cloudbaseEnvInput').value = (SYNC_CONFIG.provider === 'cloudbase') ? (SYNC_CONFIG.envId || '') : '';
-  document.getElementById('leancloudIdInput').value = (SYNC_CONFIG.provider === 'leancloud') ? (SYNC_CONFIG.envId || '') : '';
-  document.getElementById('supabaseUrlInput').value = (SYNC_CONFIG.provider === 'supabase') ? (SYNC_CONFIG.envId || '') : '';
-  document.getElementById('familyCodeInput').value = SYNC_CONFIG.familyCode || '';
-  toggleProviderFields(SYNC_CONFIG.provider || 'cloudbase');
-  document.getElementById('settingsOverlay').style.display = 'flex';
+// --- GitHub Gist API helpers ---
+function ghHeaders() {
+  return {
+    'Authorization': 'token ' + SYNC_CONFIG.token,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
 }
 
-function closeSettings() {
-  document.getElementById('settingsOverlay').style.display = 'none';
-}
-
-function onProviderChange() {
-  var provider = document.getElementById('cloudProviderSelect').value;
-  toggleProviderFields(provider);
-}
-
-function toggleProviderFields(provider) {
-  var cbFields = document.getElementById('cloudbaseFields');
-  var lcFields = document.getElementById('leancloudFields');
-  var sbFields = document.getElementById('supabaseFields');
-  cbFields.style.display = (provider === 'cloudbase' ? 'block' : 'none');
-  lcFields.style.display = (provider === 'leancloud' ? 'block' : 'none');
-  sbFields.style.display = (provider === 'supabase' ? 'block' : 'none');
-}
-
-function saveSettings() {
-  var provider = document.getElementById('cloudProviderSelect').value;
-  SYNC_CONFIG.provider = provider;
-  if (provider === 'cloudbase') {
-    SYNC_CONFIG.envId = document.getElementById('cloudbaseEnvInput').value.trim();
-  } else if (provider === 'leancloud') {
-    SYNC_CONFIG.envId = document.getElementById('leancloudIdInput').value.trim();
-  } else {
-    SYNC_CONFIG.envId = document.getElementById('supabaseUrlInput').value.trim();
-  }
-  SYNC_CONFIG.familyCode = document.getElementById('familyCodeInput').value.trim().toLowerCase();
-  saveSyncConfig();
-  closeSettings();
-
-  if (isSyncEnabled()) {
-    if (SYNC_CONFIG.provider === 'cloudbase') {
-      showToast('⏳ 正在连接 CloudBase…');
-      cloudbaseLogin().then(function() {
-        return syncPull(false);
-      }).then(function() {
-        return syncPush();
-      }).then(function() {
-        showToast('✅ 同步已启用');
-      }).catch(function(e) {
-        showToast('⚠️ ' + (e.message || '连接失败'));
-      });
-    } else {
-      syncPull(false).then(function() {
-        syncPush().then(function() { showToast('✅ 同步已启用'); });
-      });
-    }
-  } else {
-    showToast('已清除同步配置，使用本地存储');
-  }
-}
-
-// --- CloudBase: Anonymous Login (HTTP API v1) ---
-// POST https://{envId}.api.tcloudbasegateway.com/auth/v1/signin/anonymously
-function cloudbaseLogin() {
-  if (_cloudbaseToken) return Promise.resolve(_cloudbaseToken);
-  var envId = SYNC_CONFIG.envId;
-  var loginUrl = 'https://' + envId + '.api.tcloudbasegateway.com/auth/v1/signin/anonymously';
-  var deviceId = _getDeviceId();
-  console.log('[CloudBase Login] URL:', loginUrl, 'DeviceId:', deviceId);
-  return fetch(loginUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-device-id': deviceId
-    },
-    body: JSON.stringify({})
+function ghApi(method, path, body) {
+  var url = 'https://api.github.com' + path;
+  return fetch(url, {
+    method: method,
+    headers: ghHeaders(),
+    body: body ? JSON.stringify(body) : undefined
   }).then(function(resp) {
+    if (resp.status === 401) throw new Error('Token 无效或已过期');
+    if (resp.status === 403) throw new Error('API 额度超限或权限不足');
+    if (resp.status === 404) return null; // Gist not found
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     return resp.json();
-  }).then(function(data) {
-    console.log('[CloudBase Login] Response:', JSON.stringify(data).substring(0, 300));
-    if (data.access_token) {
-      _cloudbaseToken = data.access_token;
-      localStorage.setItem('growth_bank_cb_token', JSON.stringify(_cloudbaseToken));
-      return _cloudbaseToken;
-    }
-    throw new Error(data.message || data.error_description || '登录返回无 token');
   });
 }
 
-function testCloudbaseConnection(envId) {
-  var loginUrl = 'https://' + envId + '.api.tcloudbasegateway.com/auth/v1/signin/anonymously';
-  var deviceId = _getDeviceId();
-  console.log('[CloudBase Test] URL:', loginUrl);
-  fetch(loginUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-device-id': deviceId
-    },
-    body: JSON.stringify({}),
-    mode: 'cors'
-  }).then(function(resp) {
-    console.log('[CloudBase Test] HTTP:', resp.status);
-    if (!resp.ok) {
-      return resp.text().then(function(t) {
-        console.log('[CloudBase Test] Error Body:', t.substring(0, 200));
-        throw new Error('HTTP ' + resp.status + ': ' + t.substring(0, 80));
-      });
-    }
-    return resp.json();
-  }).then(function(data) {
-    console.log('[CloudBase Test] Response:', JSON.stringify(data).substring(0, 300));
-    if (data.access_token) {
-      showToast('✅ CloudBase 连接成功！匿名登录正常');
-    } else {
-      showToast('⚠️ 响应异常: ' + JSON.stringify(data).substring(0, 80));
-    }
-  }).catch(function(e) {
-    console.error('[CloudBase Test] Error:', e);
-    var msg = e.message || '';
-    if (msg.indexOf('ERR_NAME_NOT_RESOLVED') >= 0 || msg.indexOf('getaddrinfo') >= 0) {
-      showToast('❌ 域名无法解析，请检查环境 ID 是否正确');
-    } else if (msg.indexOf('Failed to fetch') >= 0) {
-      showToast('❌ 网络不通或 CORS 被拦截，请在 CloudBase 控制台→安全来源中添加当前域名');
-    } else {
-      showToast('❌ 连接失败: ' + msg.substring(0, 60));
-    }
-  });
+// --- Find or create Gist for this family ---
+function getGistFileName() {
+  return SYNC_CONFIG.familyCode + '_state.json';
 }
 
-// --- Test connection (supports CloudBase + LeanCloud + Supabase) ---
-function testCloudConnection() {
-  var provider = document.getElementById('cloudProviderSelect').value;
-  var testUrl, headers;
-
-  if (provider === 'cloudbase') {
-    var envId = document.getElementById('cloudbaseEnvInput').value.trim();
-    if (!envId) { showToast('⚠️ 请先填入环境 ID'); return; }
-    // Test by attempting anonymous login
-    showToast('⏳ 正在测试 CloudBase 连接…');
-    testCloudbaseConnection(envId);
-    return;
-  } else if (provider === 'leancloud') {
-    var appId = document.getElementById('leancloudIdInput').value.trim();
-    var appKey = document.getElementById('leancloudKeyInput').value.trim();
-    if (!appId || !appKey) { showToast('⚠️ 请先填入 App ID 和 App Key'); return; }
-    testUrl = 'https://api.leancloud.cn/1.1/classes/FamilyState?limit=0';
-    headers = {
-      'X-AVOS-Application-Id': appId,
-      'X-AVOS-Application-Key': appKey,
-      'Content-Type': 'application/json'
-    };
-  } else {
-    var url = document.getElementById('supabaseUrlInput').value.trim();
-    var key = document.getElementById('supabaseKeyInput2').value.trim();
-    if (!url || !key) { showToast('⚠️ 请先填入 URL 和 Anon Key'); return; }
-    testUrl = url.replace(/\/+$/, '') + '/rest/v1/family_states?select=family_code&limit=1';
-    headers = {
-      'apikey': key,
-      'Authorization': 'Bearer ' + key
-    };
+function findOrCreateGist() {
+  // First try cached ID
+  if (_gistId) {
+    return ghApi('GET', '/gists/' + _gistId).then(function(gist) {
+      if (gist) return gist;
+      _gistId = '';
+      return findGistBySearch();
+    });
   }
+  return findGistBySearch();
+}
 
-  showToast('⏳ 正在测试连接…');
-  console.log('[Cloud Test] Provider:', provider, 'URL:', testUrl);
+function findGistBySearch() {
+  // Search user's gists for one containing our family file
+  return ghApi('GET', '/gists?per_page=100').then(function(gists) {
+    if (!gists || !gists.length) return null;
+    var fname = getGistFileName();
+    for (var i = 0; i < gists.length; i++) {
+      if (gists[i].files && gists[i].files[fname]) {
+        _gistId = gists[i].id;
+        localStorage.setItem('growth_bank_gist_id', _gistId);
+        console.log('[Sync] Found existing gist:', _gistId);
+        return gists[i];
+      }
+    }
+    return null; // Need to create new
+  });
+}
 
-  fetch(testUrl, {
-    method: 'GET',
-    mode: 'cors',
-    headers: headers
+// --- Test connection ---
+function testGithubConnection() {
+  var tokenInput = document.getElementById('ghTokenInput');
+  var token = (tokenInput ? tokenInput.value.trim() : '') || SYNC_CONFIG.token;
+  if (!token) { showToast('⚠️ 请先填入 GitHub Token'); return; }
+
+  showToast('⏳ 正在测试 GitHub 连接…');
+
+  fetch('https://api.github.com/user', {
+    headers: {
+      'Authorization': 'token ' + token,
+      'Accept': 'application/vnd.github.v3+json'
+    }
   })
   .then(function(resp) {
-    console.log('[Cloud Test] HTTP status:', resp.status);
-    // LeanCloud returns 200 for empty query, Supabase returns 200
-    if (resp.status === 200 || resp.status === 201) {
-      showToast('✅ ' + (provider === 'leancloud' ? 'LeanCloud' : 'Supabase') + ' 连接成功！');
+    if (resp.status === 401) throw new Error('Token 无效或已过期');
+    if (resp.status === 403) throw new Error('Token 权限不足（需要 repo 和 gist scope）');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return resp.json();
+  })
+  .then(function(user) {
+    if (user && user.login) {
+      showToast('✅ GitHub 连接成功！你好 ' + user.login);
     } else {
-      return resp.text().then(function(body) {
-        console.log('[Cloud Test] Error body:', body);
-        showToast('⚠️ 请求失败 (HTTP ' + resp.status + ')');
-      });
+      showToast('⚠️ 响应异常');
     }
   })
   .catch(function(e) {
-    console.error('[Cloud Test] Fetch error:', e);
+    console.error('[GitHub Test] Error:', e);
     var msg = e.message || '';
     if (msg.indexOf('Failed to fetch') >= 0) {
-      showToast('❌ 网络不通，请检查网络或更换服务商');
-    } else if (msg.indexOf('ERR_NAME_NOT_RESOLVED') >= 0 || msg.indexOf('getaddrinfo') >= 0) {
-      showToast('❌ 域名无法解析，请尝试切换到 LeanCloud（国内服务）');
+      showToast('❌ 网络不通，请检查网络连接');
     } else {
-      showToast('❌ 连接失败: ' + msg.substring(0, 60));
+      showToast('❌ ' + msg.substring(0, 60));
     }
   });
 }
 
 // --- Pull state from cloud ---
-function handlePullRows(rows, notify) {
-  if (rows && rows.length > 0) {
-    var remoteState = rows[0].state || rows[0].state_data || null;
-    if (remoteState) {
+function syncPull(notify) {
+  if (!isSyncEnabled() || syncLock) return Promise.resolve();
+  syncLock = true;
+
+  return findOrCreateGist().then(function(gist) {
+    if (!gist) {
+      // No gist exists yet -> push local data up
+      if (notify) showToast('📤 云端尚无数据，正在上传…');
+      return syncPush();
+    }
+
+    // Parse state from gist file content
+    var fname = getGistFileName();
+    var file = gist.files[fname];
+    if (!file || !file.content) {
+      if (notify) showToast('📤 云端文件为空，正在上传…');
+      return syncPush();
+    }
+
+    try {
+      var remoteState = JSON.parse(file.content);
       state = remoteState;
       localStorage.setItem('growth_bank_state', JSON.stringify(state));
       refreshAll();
       if (notify) showToast('📥 已从云端同步最新数据');
       updateSyncUi(true);
-      return Promise.resolve();
+    } catch(e) {
+      console.error('[syncPull] Parse error:', e);
+      if (notify) showToast('⚠️ 云端数据格式异常');
+      updateSyncUi(false);
     }
-  }
-  // No data on server -> push local up
-  return syncPush().then(function() {
-    if (notify) showToast('📤 云端尚无数据，已上传本地数据');
-  });
-}
-
-function syncPull(notify) {
-  if (!isSyncEnabled() || syncLock) return Promise.resolve();
-  syncLock = true;
-
-  var doPull = function() {
-    if (SYNC_CONFIG.provider === 'cloudbase') {
-      // GET /database/instances/(default)/databases/(default)/collections/{name}/documents?query={ejson}&limit=1
-      var queryEjson = encodeURIComponent(JSON.stringify({ family_code: SYNC_CONFIG.familyCode }));
-      var pullUrl = cloudUrl('database/instances/(default)/databases/(default)/collections/family_states/documents') + '?query=' + queryEjson + '&limit=1';
-      return fetch(pullUrl, { method: 'GET', headers: cloudHeaders() })
-        .then(function(resp) {
-          if (!resp.ok) throw new Error('HTTP ' + resp.status);
-          return resp.json();
-        }).then(function(data) {
-          console.log('[syncPull CB]', JSON.stringify(data).substring(0, 300));
-          var rows = [];
-          if (data && data.documents) rows = data.documents;
-          else if (data && data.data && data.data.documents) rows = data.data.documents;
-          else if (Array.isArray(data)) rows = data;
-          return handlePullRows(rows, notify);
-        });
-    } else if (SYNC_CONFIG.provider === 'leancloud') {
-      var encodedCode = encodeURIComponent(SYNC_CONFIG.familyCode);
-      var lcPullUrl = cloudUrl('classes/FamilyState');
-      var queryParams = '?where=' + encodeURIComponent(JSON.stringify({family_code: SYNC_CONFIG.familyCode})) + '&limit=1';
-      return fetch(lcPullUrl + queryParams, { method: 'GET', headers: cloudHeaders() })
-        .then(function(resp) { if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
-        .then(function(data) { return handlePullRows(data.results || data, notify); });
-    } else {
-      // Supabase
-      var encodedCode2 = encodeURIComponent(SYNC_CONFIG.familyCode);
-      var sbPullUrl = cloudUrl('family_states') + '?family_code=eq.' + encodedCode2 + '&select=state';
-      return fetch(sbPullUrl, { method: 'GET', headers: cloudHeaders() })
-        .then(function(resp) { if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
-        .then(function(data) { return handlePullRows(Array.isArray(data) ? data : [], notify); });
-    }
-  };
-
-  var pullPromise;
-  if (SYNC_CONFIG.provider === 'cloudbase' && !_cloudbaseToken) {
-    pullPromise = cloudbaseLogin().then(doPull);
-  } else {
-    pullPromise = doPull();
-  }
-
-  return pullPromise.catch(function(e) {
+  }).catch(function(e) {
     console.error('[syncPull] Error:', e);
-    if (notify) showToast('⚠️ 同步拉取失败: ' + (e.message || '网络错误').substring(0, 40));
+    if (notify) showToast('⚠️ 同步失败: ' + (e.message || '网络错误').substring(0, 40));
     updateSyncUi(false);
   }).finally(function() { syncLock = false; });
 }
@@ -1623,80 +1400,45 @@ function syncPush() {
   if (!isSyncEnabled() || syncLock) return Promise.resolve();
   syncLock = true;
 
-  var doPush = function() {
-    var pushUrl, method, body, headers;
+  var fname = getGistFileName();
+  var stateJson = JSON.stringify(state, null, 2);
 
-    if (SYNC_CONFIG.provider === 'cloudbase') {
-      // PATCH /database/instances/(default)/databases/(default)/collections/{name}/documents
-      // Use upsert: create if not exist, update if exist
-      pushUrl = cloudUrl('database/instances/(default)/databases/(default)/collections/family_states/documents');
-      method = 'PATCH';
-      body = JSON.stringify({
-        query: { family_code: SYNC_CONFIG.familyCode },
-        data: {
-          family_code: SYNC_CONFIG.familyCode,
-          state: state,
-          updated_at: new Date().toISOString()
-        },
-        multi: false,
-        upsert: true
+  return findOrCreateGist().then(function(existingGist) {
+    if (existingGist) {
+      // Update existing gist
+      console.log('[syncPush] Updating gist:', existingGist.id);
+      return ghApi('PATCH', '/gists/' + existingGist.id, {
+        files: {}
+      })[fname] = undefined; // This won't work, use proper format
+
+      return ghApi('PATCH', '/gists/' + existingGist.id, {
+        description: '暑期成长银行 - 家庭数据 (' + SYNC_CONFIG.familyCode + ')',
+        files: (function() { var o = {}; o[fname] = { content: stateJson }; return o; })()
       });
-      headers = cloudHeaders();
-    } else if (SYNC_CONFIG.provider === 'leancloud') {
-      pushUrl = cloudUrl('classes/FamilyState');
-      method = 'POST';
-      body = JSON.stringify({
-        family_code: SYNC_CONFIG.familyCode,
-        state: state,
-        updated_at: new Date().toISOString()
-      });
-      headers = Object.assign({}, cloudHeaders());
     } else {
-      // Supabase
-      pushUrl = cloudUrl('family_states');
-      method = 'POST';
-      body = JSON.stringify({
-        family_code: SYNC_CONFIG.familyCode,
-        state: state,
-        updated_at: new Date().toISOString()
-      });
-      headers = Object.assign({}, cloudHeaders(), {
-        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      // Create new private gist
+      console.log('[syncPush] Creating new gist');
+      return ghApi('POST', '/gists', {
+        description: '暑期成长银行 - 家庭数据 (' + SYNC_CONFIG.familyCode + ')',
+        public: false,
+        files: (function() { var o = {}; o[fname] = { content: stateJson }; return o; })()
+      }).then(function(newGist) {
+        if (newGist && newGist.id) {
+          _gistId = newGist.id;
+          localStorage.setItem('growth_bank_gist_id', _gistId);
+          console.log('[syncPush] Created gist:', _gistId);
+        }
+        return newGist;
       });
     }
-
-    return fetch(pushUrl, {
-      method: method,
-      headers: headers,
-      body: body
-    }).then(function(resp) {
-      console.log('[syncPush] HTTP', resp.status, 'Provider:', SYNC_CONFIG.provider);
-      if (SYNC_CONFIG.provider === 'cloudbase') {
-        return resp.json().then(function(d) {
-          console.log('[syncPush CB]', JSON.stringify(d).substring(0, 300));
-          if (d.updated !== undefined || d.matched !== undefined || resp.ok) {
-            updateSyncUi(true);
-          } else {
-            throw new Error('CloudBase error: ' + (d.message || JSON.stringify(d).substring(0,100)));
-          }
-        });
-      }
-      if (resp.status === 200 || resp.status === 201) {
-        updateSyncUi(true);
-      } else {
-        throw new Error('HTTP ' + resp.status);
-      }
-    });
-  };
-
-  var pushPromise;
-  if (SYNC_CONFIG.provider === 'cloudbase' && !_cloudbaseToken) {
-    pushPromise = cloudbaseLogin().then(doPush);
-  } else {
-    pushPromise = doPush();
-  }
-
-  return pushPromise.catch(function(e) {
+  }).then(function(result) {
+    if (result) {
+      updateSyncUi(true);
+      console.log('[syncPush] Success');
+    } else {
+      throw new Error('返回结果为空');
+    }
+  }).catch(function(e) {
     console.error('[syncPush] Error:', e);
     updateSyncUi(false);
   }).finally(function() { syncLock = false; });
@@ -1713,8 +1455,6 @@ function autoSyncPush() {
 // --- Sync indicator ---
 function updateSyncUi(online) {
   var dot = document.getElementById('syncDot');
-  var providerMap = { cloudbase: 'CloudBase', leancloud: 'LeanCloud', supabase: 'Supabase' };
-  var providerName = providerMap[SYNC_CONFIG.provider] || '';
   if (!isSyncEnabled()) {
     dot.textContent = '⚪';
     dot.title = '未配置同步';
@@ -1723,11 +1463,11 @@ function updateSyncUi(online) {
   }
   if (online === true) {
     dot.textContent = '🟢';
-    dot.title = '已同步 (' + providerName + ')';
+    dot.title = '已同步 (GitHub)';
     dot.className = 'sync-dot synced';
   } else if (online === false) {
     dot.textContent = '🔴';
-    dot.title = '同步失败，检查网络或配置';
+    dot.title = '同步失败，检查 Token 或网络';
     dot.className = 'sync-dot';
   } else {
     dot.textContent = '🟡';
@@ -1740,6 +1480,37 @@ function startAutoSync() {
   setInterval(function() {
     if (isSyncEnabled() && !syncLock) syncPull();
   }, 30000);
+}
+
+// --- Settings UI ---
+function openSettings() {
+  document.getElementById('ghTokenInput').value = SYNC_CONFIG.token || '';
+  document.getElementById('familyCodeInput').value = SYNC_CONFIG.familyCode || '';
+  document.getElementById('settingsOverlay').style.display = 'flex';
+}
+
+function closeSettings() {
+  document.getElementById('settingsOverlay').style.display = 'none';
+}
+
+function saveSettings() {
+  SYNC_CONFIG.token = document.getElementById('ghTokenInput').value.trim();
+  SYNC_CONFIG.familyCode = document.getElementById('familyCodeInput').value.trim().toLowerCase();
+  saveSyncConfig();
+  closeSettings();
+
+  if (isSyncEnabled()) {
+    showToast('⏳ 正在同步…');
+    syncPull(false).then(function() {
+      return syncPush();
+    }).then(function() {
+      showToast('✅ 同步已启用');
+    }).catch(function(e) {
+      showToast('⚠️ ' + (e.message || '同步失败'));
+    });
+  } else {
+    showToast('已清除同步配置，使用本地存储');
+  }
 }
 
 let state = loadState();
