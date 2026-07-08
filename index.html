@@ -1300,7 +1300,7 @@ function ghApi(method, path, body) {
     body: body ? JSON.stringify(body) : undefined
   }).then(function(resp) {
     if (resp.status === 401) throw new Error('Token 无效或已过期');
-    if (resp.status === 403) throw new Error('API 额度超限或权限不足');
+    if (resp.status === 403) throw new Error('GitHub 权限不足：请重新生成 Token 并勾选 Gist 权限（Read and write）');
     if (resp.status === 404) return null; // Gist not found
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     return resp.json();
@@ -1460,6 +1460,14 @@ function syncPush() {
   }).catch(function(e) {
     console.error('[syncPush] Error:', e);
     updateSyncUi(false);
+    var msg = e && e.message ? e.message : '未知错误';
+    if (msg.indexOf('权限') >= 0 || msg.indexOf('403') >= 0) {
+      var now = Date.now();
+      if (!window._lastPushPermToast || now - window._lastPushPermToast > 8000) {
+        window._lastPushPermToast = now;
+        showToast('⚠️ 上传失败：' + msg.substring(0, 52));
+      }
+    }
   }).finally(function() { syncLock = false; });
 }
 
