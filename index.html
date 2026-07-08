@@ -601,25 +601,27 @@ body {
   margin-bottom: 10px;
   padding-right: 70px;
 }
-.reward-items { display: flex; flex-direction: column; gap: 6px; }
+.reward-items { display: flex; flex-direction: column; gap: 8px; }
 .reward-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
-  background: var(--mauve-50);
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 12px 14px;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  box-shadow: var(--shadow);
 }
-.reward-item .ri-name { flex: 1; }
+.reward-item .ri-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--mauve-700); }
 .reward-item .ri-action {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--mauve-600);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  padding: 3px 8px;
+  padding: 5px 10px;
   border-radius: 8px;
   transition: var(--transition);
+  white-space: nowrap;
 }
 .reward-item .ri-action:hover { background: var(--mauve-100); }
 .reward-note {
