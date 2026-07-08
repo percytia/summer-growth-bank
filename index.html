@@ -2007,6 +2007,25 @@ function saveTaskEdit(taskId) {
 function deleteTask(taskId) {
   const task = state.tasks.find(t => t.id === taskId);
   if (!task) return;
+  const safeName = task.name.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const html = `
+    <div style="padding:2px">
+      <h3 style="font-size:17px;font-weight:700;color:var(--mauve-700);margin:0 0 10px">🗑️ 删除确认</h3>
+      <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;margin:0 0 18px">
+        确定要删除任务「<b style="color:var(--mauve-700)">${safeName}</b>」吗？<br>
+        删除后无法恢复，今日已打卡的记录也会一并清除。
+      </p>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">取消</button>
+        <button class="btn-confirm" style="background:linear-gradient(135deg,#C98B82,#B97A72);border-color:#B97A72" onclick="confirmDeleteTask('${taskId}')">🗑️ 确认删除</button>
+      </div>
+    </div>`;
+  showModal(html);
+}
+
+function confirmDeleteTask(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) { closeModal(); return; }
   // Remove from completed if present (按打卡次数扣回积分)
   if (state.completedToday[taskId]) {
     const c = state.completedToday[taskId] || 0;
