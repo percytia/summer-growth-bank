@@ -172,9 +172,14 @@ body {
 /* ========== Top Dashboard ========== */
 .top-dashboard {
   margin: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dash-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 .dash-card {
   background: var(--card);
@@ -223,33 +228,45 @@ body {
 .dash-card:hover .dash-action { background: var(--mauve-200); }
 
 /* Task Dashboard - quick complete area */
+.dash-tasks { padding-bottom: 14px; }
+.dash-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.dash-head .dash-icon { margin-bottom: 0; }
+.dash-head .dash-label { margin-bottom: 0; font-size: 15px; color: var(--text-primary); }
+.dash-head .dash-action { margin-top: 0; margin-left: auto; }
+
 .dash-task-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  max-height: 96px;
+  gap: 8px;
+  max-height: 260px;
   overflow-y: auto;
 }
 .dash-task-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 10px;
+  font-size: 14px;
   cursor: pointer;
-  padding: 3px 4px;
-  border-radius: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--mauve-50);
   transition: var(--transition);
 }
-.dash-task-item:hover { background: var(--mauve-50); }
-.dash-task-item.done { opacity: 0.45; text-decoration: line-through; }
+.dash-task-item:hover { background: var(--mauve-100); }
+.dash-task-item.done { opacity: 0.5; text-decoration: line-through; background: transparent; }
 .dash-task-dot {
-  width: 16px; height: 16px;
+  width: 22px; height: 22px;
   border-radius: 50%;
   border: 2px solid var(--mauve-300);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 12px;
   color: transparent;
   flex-shrink: 0;
   transition: var(--transition);
@@ -259,11 +276,11 @@ body {
   border-color: var(--mauve-600);
   color: white;
 }
-.dash-task-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dash-task-name { flex: 1; font-size: 14px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dash-task-pts {
   font-weight: 800;
   color: var(--mauve-600);
-  font-size: 10px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
@@ -956,34 +973,38 @@ body {
 
 <!-- ====== Top Dashboard (visible on all pages) ====== -->
 <div class="top-dashboard" id="topDashboard">
-  <!-- 今日任务 -->
-  <div class="dash-card" id="dashTasks" onclick="switchPage('checkin')">
-    <div class="dash-icon">📋</div>
-    <div class="dash-label">今日任务</div>
+  <!-- 今日任务 - 整行 -->
+  <div class="dash-card dash-tasks" id="dashTasks" onclick="switchPage('checkin')">
+    <div class="dash-head">
+      <div class="dash-icon">📋</div>
+      <div class="dash-label">今日任务</div>
+      <div class="dash-action">打开打卡 →</div>
+    </div>
     <div class="dash-task-list" id="dashTaskList"></div>
     <div class="dash-sub" id="dashTasksEmpty" style="display:none">🎉 今日任务已全部完成！</div>
-    <div class="dash-action">打开打卡 →</div>
   </div>
 
-  <!-- 我的成长账户 -->
-  <div class="dash-card dash-account" onclick="switchPage('rewards')">
-    <div class="dash-icon">🏦</div>
-    <div class="dash-label">我的成长账户</div>
-    <div class="dash-value" id="dashScore">0</div>
-    <div class="dash-sub">积分用来兑换看得见的鼓励</div>
-    <div class="dash-action">去兑换 →</div>
-  </div>
-
-  <!-- 今日成长存款单 -->
-  <div class="dash-card dash-deposit" onclick="switchPage('checkin')">
-    <div class="dash-icon">📜</div>
-    <div class="dash-label">今日成长存款单</div>
-    <div class="dash-value" id="dashTodayPts">0分</div>
-    <div class="dash-deposit-bar">
-      <div class="dash-deposit-fill" id="dashDepositFill" style="width:0%"></div>
+  <div class="dash-row">
+    <!-- 我的成长账户 -->
+    <div class="dash-card dash-account" onclick="switchPage('rewards')">
+      <div class="dash-icon">🏦</div>
+      <div class="dash-label">我的成长账户</div>
+      <div class="dash-value" id="dashScore">0</div>
+      <div class="dash-sub">积分用来兑换看得见的鼓励</div>
+      <div class="dash-action">去兑换 →</div>
     </div>
-    <div class="dash-sub" id="dashDepositText">完成一项任务，存入成长能量</div>
-    <div class="dash-deposit-tag" id="dashDepositTag">今日存入 0 项</div>
+
+    <!-- 今日成长存款单 -->
+    <div class="dash-card dash-deposit" onclick="switchPage('checkin')">
+      <div class="dash-icon">📜</div>
+      <div class="dash-label">今日成长存款单</div>
+      <div class="dash-value" id="dashTodayPts">0分</div>
+      <div class="dash-deposit-bar">
+        <div class="dash-deposit-fill" id="dashDepositFill" style="width:0%"></div>
+      </div>
+      <div class="dash-sub" id="dashDepositText">完成一项任务，存入成长能量</div>
+      <div class="dash-deposit-tag" id="dashDepositTag">今日存入 0 项</div>
+    </div>
   </div>
 </div>
 
@@ -1575,8 +1596,8 @@ function renderDashTasks() {
   }
   
   emptyDiv.style.display = 'none';
-  // Show top 3 incomplete tasks
-  const showTasks = incompleteTasks.slice(0, 3);
+  // Show top 5 incomplete tasks
+  const showTasks = incompleteTasks.slice(0, 5);
   container.innerHTML = showTasks.map(t => `
     <div class="dash-task-item" onclick="event.stopPropagation();dashToggleTask('${t.id}')">
       <div class="dash-task-dot"></div>
@@ -1585,8 +1606,8 @@ function renderDashTasks() {
     </div>
   `).join('');
   // If more tasks remaining, show hint
-  if (incompleteTasks.length > 3) {
-    container.innerHTML += `<div style="font-size:10px;color:var(--text-muted);text-align:center;margin-top:2px">还有 ${incompleteTasks.length - 3} 项…</div>`;
+  if (incompleteTasks.length > 5) {
+    container.innerHTML += `<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px">还有 ${incompleteTasks.length - 5} 项，打开打卡查看全部 →</div>`;
   }
 }
 
