@@ -79,17 +79,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   position: relative;
   z-index: 1;
 }
+.header-top > div:first-child { min-width: 0; flex: 1; }
 .header h1 {
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: 0.5px;
+  line-height: 1.3;
+  overflow-wrap: break-word;
 }
 .header-subtitle {
   font-size: 13px;
-  opacity: 0.85;
+  opacity: 0.9;
   margin-top: 4px;
   position: relative;
   z-index: 1;
@@ -110,15 +114,14 @@ body {
 /* Settings floating button */
 .settings-fab {
   position: fixed;
-  top: 34px;
-  right: 20px;
-  width: 40px; height: 40px;
+  bottom: 70px;
+  right: 16px;
+  width: 44px; height: 44px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.5);
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(8px);
+  border: 2px solid var(--mauve-200);
+  background: var(--mauve-600);
   color: white;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
   z-index: 99999;
   display: flex;
@@ -127,6 +130,7 @@ body {
   transition: var(--transition);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  box-shadow: 0 4px 16px rgba(107, 92, 89, 0.28);
 }
 .settings-fab:hover { background: rgba(255,255,255,0.4); transform: rotate(30deg); }
 .score-badge {
@@ -137,6 +141,7 @@ body {
   text-align: center;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 .score-badge .score-num {
   font-size: 28px;
@@ -377,8 +382,8 @@ body {
   font-size: 20px;
   margin-bottom: 10px;
 }
-.dim-card .dim-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-.dim-card .dim-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+.dim-card .dim-name { font-size: 16px; font-weight: 700; color: var(--mauve-700); margin-bottom: 4px; }
+.dim-card .dim-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
 .dim-card .dim-progress {
   margin-top: 10px;
   display: flex;
@@ -386,7 +391,7 @@ body {
   gap: 6px;
 }
 .dim-card .dim-stars { color: #FBBF24; font-size: 14px; }
-.dim-card .dim-count { font-size: 12px; color: var(--text-secondary); }
+.dim-card .dim-count { font-size: 13px; color: var(--mauve-700); font-weight: 600; }
 
 /* dim colors */
 .dim-learn .dim-icon { background: #F4EDEA; }
