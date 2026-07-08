@@ -1132,9 +1132,13 @@ body {
       <div class="hint">所有设备使用相同的家庭码，数据即可互通。每个家庭自动创建一个私有 Gist</div>
     </div>
 
-    <div class="settings-actions" style="margin-bottom:12px">
+    <div class="settings-actions" style="margin-bottom:10px">
       <button class="btn-cancel" onclick="testGithubConnection()" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">🔍 测试连接</button>
       <button class="btn-cancel" onclick="syncPull(true)" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">📥 手动拉取</button>
+    </div>
+
+    <div class="settings-actions" style="margin-bottom:12px">
+      <button class="btn-cancel" onclick="syncPushManual()" style="flex:1;border:2px solid var(--mauve-400);border-radius:12px;background:var(--mauve-100);font-size:13px;font-weight:700;color:var(--mauve-700)">📤 上传到云端</button>
     </div>
 
     <div class="settings-actions">
@@ -1234,6 +1238,7 @@ function loadState() {
 }
 
 function saveState(state) {
+  state.updatedAt = Date.now();
   localStorage.setItem('growth_bank_state', JSON.stringify(state));
   autoSyncPush(state);
 }
@@ -1493,7 +1498,34 @@ function updateSyncUi(online) {
 function startAutoSync() {
   setInterval(function() {
     if (isSyncEnabled() && !syncLock) syncPull();
-  }, 30000);
+  }, 15000);
+}
+
+// 判断本地状态是否仍是“出厂默认”（未个性化改动、未打卡）-> 新设备应直接采用云端，避免用默认覆盖家庭数据
+function isPristineLocal(s) {
+  if (!s) return false;
+  if (s.totalScore !== 0) return false;
+  if (s.completedToday && Object.keys(s.completedToday).length > 0) return false;
+  if (s.portfolio && s.portfolio.length > 0) return false;
+  if (s.review && (s.review.best || s.review.hard || s.review.parent || s.review.support)) return false;
+  var localNames = (s.tasks || []).map(function(t){ return t.name; }).sort().join('|');
+  var defNames = DEFAULT_TASKS.map(function(t){ return t.name; }).sort().join('|');
+  return localNames === defNames;
+}
+
+// 忽略 updatedAt 后比较两份状态内容是否一致
+function stateSig(s) {
+  if (!s) return '';
+  var c = JSON.parse(JSON.stringify(s));
+  delete c.updatedAt;
+  return JSON.stringify(c);
+}
+
+// 手动上传当前本地数据到云端
+function syncPushManual() {
+  if (!isSyncEnabled()) { showToast('⚠️ 请先在上方填写 Token 和家庭码'); return; }
+  showToast('⏳ 正在上传到云端…');
+  syncPush().then(function() { showToast('✅ 已上传到云端'); });
 }
 
 // --- Settings UI ---
@@ -2115,9 +2147,28 @@ function init() {
   renderGallery();
   loadReviewIntoForm();
 
-  // Pull latest from Supabase on startup if configured
+  // 启动同步：安全恢复策略 —— 优先保留本机未上传的改动，全新设备则采用云端
   if (isSyncEnabled()) {
-    syncPull(false);
+    var localBefore = JSON.parse(JSON.stringify(state));
+    if (isPristineLocal(localBefore)) {
+      // 本机仍是出厂默认 -> 直接拉取云端（新设备加入家庭，避免用默认覆盖家庭数据）
+      syncPull(false);
+    } else {
+      findOrCreateGist().then(function(gist) {
+        var remote = null;
+        if (gist) {
+          var f = gist.files[getGistFileName()];
+          if (f && f.content) { try { remote = JSON.parse(f.content); } catch(e) {} }
+        }
+        if (!remote) {
+          syncPush(); // 云端无数据，上传本地
+        } else if (stateSig(localBefore) === stateSig(remote)) {
+          state = remote; saveState(state); refreshAll(); // 内容一致，采用云端
+        } else {
+          syncPush(); // 不一致，保留并上传本机改动（避免丢失）
+        }
+      }).catch(function() { /* 离线，保留本地 */ });
+    }
   }
   // Start periodic auto-sync
   startAutoSync();
