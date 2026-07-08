@@ -276,6 +276,10 @@ body {
   border-color: var(--mauve-600);
   color: white;
 }
+.dash-task-dot.on {
+  background: var(--mauve-600);
+  border-color: var(--mauve-600);
+}
 .dash-task-name { flex: 1; font-size: 14px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dash-task-pts {
   font-weight: 800;
@@ -471,6 +475,34 @@ body {
   border-color: var(--mauve-600);
   color: white;
 }
+/* 可重复任务：计数圆圈 + 减号按钮 */
+.task-check.checked {
+  background: var(--mauve-600);
+  border-color: var(--mauve-600);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+.task-item.task-repeat {
+  border-left: 3px solid var(--mauve-400);
+}
+.rep-minus {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--mauve-300);
+  background: var(--card);
+  color: var(--mauve-600);
+  font-size: 20px; line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  transition: var(--transition);
+}
+.rep-minus:active { background: var(--mauve-100); }
 
 /* ========== Weekly Review ========== */
 .review-section {
@@ -1186,22 +1218,22 @@ const CAT_NAMES = { learn: '学习力', sport: '运动力', control: '自控力'
 const CAT_CLASSES = { learn: 'cat-learn', sport: 'cat-sport', control: 'cat-control', explore: 'cat-explore', practice: 'cat-practice' };
 
 const DEFAULT_TASKS = [
-  { id: 't1', cat: 'learn', name: '认真写日记', desc: '记录今天的所见所思', pts: 2 },
-  { id: 't2', cat: 'learn', name: '课外阅读30分钟', desc: '选一本好书，静心阅读', pts: 2 },
-  { id: 't3', cat: 'learn', name: '练字20分钟', desc: '一笔一划，字如其人', pts: 1 },
-  { id: 't4', cat: 'learn', name: '今日学习复盘', desc: '回顾今天学到的知识', pts: 1 },
-  { id: 't5', cat: 'sport', name: '户外活动2小时', desc: '阳光下尽情奔跑', pts: 2 },
-  { id: 't6', cat: 'sport', name: '运动锻炼30分钟', desc: '跳绳、跑步或球类运动', pts: 2 },
-  { id: 't7', cat: 'sport', name: '散步8000步', desc: '饭后散步，放松身心', pts: 1 },
-  { id: 't8', cat: 'control', name: '控制屏幕≤2小时', desc: '拿回时间的主动权', pts: 2 },
-  { id: 't9', cat: 'control', name: '自己制定明日计划', desc: '提前规划，心中有数', pts: 1 },
-  { id: 't10', cat: 'control', name: '按时起床睡觉', desc: '规律作息，元气满满', pts: 1 },
-  { id: 't11', cat: 'explore', name: '探索一个新兴趣', desc: '画画、编程、手工…都可以', pts: 2 },
-  { id: 't12', cat: 'explore', name: '和家人认真聊天', desc: '表达情绪，学会倾听', pts: 1 },
-  { id: 't13', cat: 'explore', name: '写情绪日记', desc: '觉察并记录自己的感受', pts: 1 },
-  { id: 't14', cat: 'practice', name: '做一项家务', desc: '洗碗、扫地、整理房间', pts: 2 },
-  { id: 't15', cat: 'practice', name: '帮家人做饭', desc: '一起准备一顿美味的饭菜', pts: 2 },
-  { id: 't16', cat: 'practice', name: '照顾植物/宠物', desc: '培养责任心与爱心', pts: 1 },
+  { id: 't1', cat: 'learn', name: '认真写日记', desc: '记录今天的所见所思', pts: 2, repeatable: false },
+  { id: 't2', cat: 'learn', name: '课外阅读30分钟', desc: '选一本好书，静心阅读', pts: 2, repeatable: false },
+  { id: 't3', cat: 'learn', name: '练字20分钟', desc: '一笔一划，字如其人', pts: 1, repeatable: false },
+  { id: 't4', cat: 'learn', name: '今日学习复盘', desc: '回顾今天学到的知识', pts: 1, repeatable: false },
+  { id: 't5', cat: 'sport', name: '户外活动2小时', desc: '阳光下尽情奔跑', pts: 2, repeatable: false },
+  { id: 't6', cat: 'sport', name: '运动锻炼30分钟', desc: '跳绳、跑步或球类运动', pts: 2, repeatable: false },
+  { id: 't7', cat: 'sport', name: '散步8000步', desc: '饭后散步，放松身心', pts: 1, repeatable: false },
+  { id: 't8', cat: 'control', name: '控制屏幕≤2小时', desc: '拿回时间的主动权', pts: 2, repeatable: false },
+  { id: 't9', cat: 'control', name: '自己制定明日计划', desc: '提前规划，心中有数', pts: 1, repeatable: false },
+  { id: 't10', cat: 'control', name: '按时起床睡觉', desc: '规律作息，元气满满', pts: 1, repeatable: false },
+  { id: 't11', cat: 'explore', name: '探索一个新兴趣', desc: '画画、编程、手工…都可以', pts: 2, repeatable: false },
+  { id: 't12', cat: 'explore', name: '和家人认真聊天', desc: '表达情绪，学会倾听', pts: 1, repeatable: false },
+  { id: 't13', cat: 'explore', name: '写情绪日记', desc: '觉察并记录自己的感受', pts: 1, repeatable: false },
+  { id: 't14', cat: 'practice', name: '做一项家务', desc: '洗碗、扫地、整理房间', pts: 2, repeatable: false },
+  { id: 't15', cat: 'practice', name: '帮家人做饭', desc: '一起准备一顿美味的饭菜', pts: 2, repeatable: false },
+  { id: 't16', cat: 'practice', name: '照顾植物/宠物', desc: '培养责任心与爱心', pts: 1, repeatable: false },
 ];
 
 const DEFAULT_REWARDS = {
@@ -1597,8 +1629,9 @@ function showToast(msg) {
 function updateAllStats() {
   // Total score
   document.getElementById('totalScore').textContent = state.totalScore;
-  // Today done
-  const todayDone = Object.keys(state.completedToday).length;
+  // Today done (总打卡次数 = 各任务完成次数之和)
+  let todayDone = 0;
+  Object.keys(state.completedToday).forEach(tid => { todayDone += (state.completedToday[tid] || 0); });
   document.getElementById('statDone').textContent = todayDone;
   // Dims lit
   const dimsLit = new Set();
@@ -1621,40 +1654,52 @@ function renderDashboard() {
 function renderDashTasks() {
   const container = document.getElementById('dashTaskList');
   const emptyDiv = document.getElementById('dashTasksEmpty');
-  const incompleteTasks = state.tasks.filter(t => !state.completedToday[t.id]);
-  
+  // 可重复任务始终显示（可多次打卡）；一次性任务仅显示未完成项
+  const actionTasks = state.tasks.filter(t => !t.repeatable && !state.completedToday[t.id]);
+  const repTasks = state.tasks.filter(t => t.repeatable);
+  const showTasks = actionTasks.concat(repTasks).slice(0, 5);
+
   if (state.tasks.length === 0) {
     container.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:8px 0;text-align:center">暂无任务，去打卡页添加吧</div>';
     emptyDiv.style.display = 'none';
     return;
   }
-  
-  if (incompleteTasks.length === 0) {
+
+  if (showTasks.length === 0) {
     container.innerHTML = '';
     emptyDiv.style.display = 'block';
     return;
   }
-  
+
   emptyDiv.style.display = 'none';
-  // Show top 5 incomplete tasks
-  const showTasks = incompleteTasks.slice(0, 5);
-  container.innerHTML = showTasks.map(t => `
-    <div class="dash-task-item" onclick="event.stopPropagation();dashToggleTask('${t.id}')">
-      <div class="dash-task-dot"></div>
-      <span class="dash-task-name">${t.name}</span>
-      <span class="dash-task-pts">+${t.pts}</span>
-    </div>
-  `).join('');
-  // If more tasks remaining, show hint
-  if (incompleteTasks.length > 5) {
-    container.innerHTML += `<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px">还有 ${incompleteTasks.length - 5} 项，打开打卡查看全部 →</div>`;
+  container.innerHTML = showTasks.map(t => {
+    const rep = !!t.repeatable;
+    const count = state.completedToday[t.id] || 0;
+    const label = rep ? `${t.name}${count > 0 ? ' ×' + count : ''}` : t.name;
+    return `
+      <div class="dash-task-item ${rep ? 'rep' : ''}" onclick="event.stopPropagation();dashToggleTask('${t.id}')">
+        <div class="dash-task-dot ${rep && count > 0 ? 'on' : ''}"></div>
+        <span class="dash-task-name">${label}</span>
+        <span class="dash-task-pts">+${t.pts}</span>
+      </div>`;
+  }).join('');
+  if (showTasks.length >= 5) {
+    container.innerHTML += `<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px">打开打卡查看全部 →</div>`;
   }
 }
 
 function dashToggleTask(taskId) {
   const task = state.tasks.find(t => t.id === taskId);
   if (!task) return;
-  state.completedToday[taskId] = true;
+  if (task.repeatable) {
+    state.completedToday[taskId] = (state.completedToday[taskId] || 0) + 1;
+    state.totalScore += task.pts;
+    saveState(state);
+    refreshAll();
+    showToast(`✨ +${task.pts}分 · ${task.name} 打卡成功！（第 ${state.completedToday[taskId]} 次）`);
+    return;
+  }
+  state.completedToday[taskId] = 1;
   state.totalScore += task.pts;
   saveState(state);
   refreshAll();
@@ -1666,39 +1711,40 @@ function renderDashAccount() {
 }
 
 function renderDashDeposit() {
-  const todayDone = Object.keys(state.completedToday).length;
+  let todayDone = 0;
+  Object.keys(state.completedToday).forEach(tid => { todayDone += (state.completedToday[tid] || 0); });
   const totalTasks = state.tasks.length;
   const pct = totalTasks > 0 ? Math.min(100, Math.round((todayDone / totalTasks) * 100)) : 0;
-  
-  // Calculate today's earned points
+
+  // Calculate today's earned points (考虑可重复任务的多次计分)
   let todayPts = 0;
   Object.keys(state.completedToday).forEach(tid => {
     const t = state.tasks.find(x => x.id === tid);
-    if (t) todayPts += t.pts;
+    if (t) todayPts += t.pts * (state.completedToday[tid] || 0);
   });
-  
+
   document.getElementById('dashTodayPts').textContent = `${todayPts}分`;
   document.getElementById('dashDepositFill').style.width = `${pct}%`;
-  
+
   const textEl = document.getElementById('dashDepositText');
   const tagEl = document.getElementById('dashDepositTag');
   const card = document.querySelector('.dash-deposit');
-  
+
   if (todayDone === 0) {
     textEl.textContent = '完成一项任务，存入成长能量';
-    tagEl.textContent = '今日存入 0 项';
+    tagEl.textContent = '今日存入 0 次';
     card.classList.remove('dash-deposit-active');
   } else if (pct < 50) {
-    textEl.textContent = `已存入 ${todayDone} 项成长能量`;
-    tagEl.textContent = `今日存入 ${todayDone} 项 | ${pct}%`;
+    textEl.textContent = `已存入 ${todayDone} 次成长能量`;
+    tagEl.textContent = `今日存入 ${todayDone} 次 | ${pct}%`;
     card.classList.add('dash-deposit-active');
   } else if (pct < 100) {
     textEl.textContent = '进步很明显，继续加油！';
-    tagEl.textContent = `今日存入 ${todayDone} 项 | ${pct}%`;
+    tagEl.textContent = `今日存入 ${todayDone} 次 | ${pct}%`;
     card.classList.add('dash-deposit-active');
   } else {
     textEl.textContent = '🏆 今天全部完成了！';
-    tagEl.textContent = `今日存入 ${todayDone}/${totalTasks} 项`;
+    tagEl.textContent = `今日存入 ${todayDone} 次`;
     card.classList.remove('dash-deposit-active');
   }
 }
@@ -1708,7 +1754,7 @@ function renderGrowthMap() {
   const container = document.getElementById('growthMap');
   container.innerHTML = DIMENSIONS.map((dim, i) => {
     const dimTasks = state.tasks.filter(t => t.cat === dim.id);
-    const doneToday = dimTasks.filter(t => state.completedToday[t.id]).length;
+    const doneToday = dimTasks.reduce((s, t) => s + (state.completedToday[t.id] || 0), 0);
     const total = dimTasks.length;
     const stars = doneToday > 0 ? '⭐'.repeat(Math.min(doneToday, 5)) : '☆'.repeat(5);
     const active = doneToday > 0;
@@ -1719,7 +1765,7 @@ function renderGrowthMap() {
         <div class="dim-desc">${dim.desc}</div>
         <div class="dim-progress">
           <span class="dim-stars">${stars}</span>
-          <span class="dim-count">${doneToday}/${total} 项今日点亮</span>
+          <span class="dim-count">${doneToday} 次今日点亮</span>
         </div>
       </div>`;
   }).join('');
@@ -1732,10 +1778,12 @@ function openDimTasks(catId) {
     <h3>${dim.icon} ${dim.name} · 专属任务</h3>
     <div class="task-popup-tasks">
       ${dimTasks.map(t => {
-        const done = state.completedToday[t.id];
-        return `<div class="task-popup-item ${done ? 'completed' : ''}" onclick="toggleTask('${t.id}', event)">
-          <span>${done ? '✅ ' : '⬜ '}${t.name}</span>
-          <span class="task-popup-pts">+${t.pts}分</span>
+        const rep = !!t.repeatable;
+        const count = state.completedToday[t.id] || 0;
+        const mark = rep ? (count > 0 ? `✅×${count} ` : '⬜ ') : (count > 0 ? '✅ ' : '⬜ ');
+        return `<div class="task-popup-item ${count > 0 ? 'completed' : ''}" onclick="toggleTask('${t.id}', event)">
+          <span>${mark}${t.name}</span>
+          <span class="task-popup-pts">+${t.pts}${rep ? '分/次' : '分'}</span>
         </div>`;
       }).join('')}
     </div>
@@ -1788,19 +1836,27 @@ function renderTaskList() {
     return;
   }
   container.innerHTML = tasks.map(t => {
-    const done = !!state.completedToday[t.id];
+    const rep = !!t.repeatable;
+    const count = state.completedToday[t.id] || 0;
+    const done = !rep && count > 0;
     const clickAction = editMode
       ? `event.stopPropagation();openEditTask('${t.id}')`
-      : `toggleTask('${t.id}')`;
+      : `toggleTask('${t.id}', event)`;
+    const circle = rep ? (count > 0 ? count : '') : (done ? '✓' : '');
+    const repMinus = (rep && count > 0)
+      ? `<button class="rep-minus" onclick="event.stopPropagation();decrementTask('${t.id}')" title="撤销一次">−</button>`
+      : '';
+    const ptsLabel = rep ? `+${t.pts}分/次` : `+${t.pts}分`;
     return `
-      <div class="task-item ${done ? 'done' : ''}" onclick="${clickAction}">
-        <div class="task-check">${done ? '✓' : ''}</div>
+      <div class="task-item ${rep ? 'task-repeat' : ''} ${done ? 'done' : ''}" onclick="${clickAction}">
+        <div class="task-check ${rep && count > 0 ? 'checked' : ''}">${circle}</div>
         <div class="task-info">
           <div class="task-name">${t.name}</div>
           <div class="task-desc">${t.desc}</div>
         </div>
         <span class="task-cat ${CAT_CLASSES[t.cat]}">${CAT_NAMES[t.cat]}</span>
-        <span class="task-pts">+${t.pts}分</span>
+        <span class="task-pts">${ptsLabel}</span>
+        ${repMinus}
         <div class="edit-actions">
           <button class="edit-action-btn edit-btn" onclick="event.stopPropagation();openEditTask('${t.id}')" title="编辑">✏️</button>
           <button class="edit-action-btn del-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="删除">🗑️</button>
@@ -1815,19 +1871,45 @@ function toggleTask(taskId, event) {
   const task = state.tasks.find(t => t.id === taskId);
   if (!task) return;
 
+  // 可重复任务：每次点击 +1 计分（同一事项可多次打卡）
+  if (task.repeatable) {
+    state.completedToday[taskId] = (state.completedToday[taskId] || 0) + 1;
+    state.totalScore += task.pts;
+    saveState(state);
+    refreshAll();
+    showToast(`✨ +${task.pts}分 · ${task.name} 打卡成功！（第 ${state.completedToday[taskId]} 次）`);
+    return;
+  }
+
+  // 一次性任务：原有布尔切换
   if (state.completedToday[taskId]) {
+    state.totalScore = Math.max(0, state.totalScore - task.pts * (state.completedToday[taskId] || 1));
     delete state.completedToday[taskId];
-    state.totalScore = Math.max(0, state.totalScore - task.pts);
     saveState(state);
     refreshAll();
     return;
   }
 
-  state.completedToday[taskId] = true;
+  state.completedToday[taskId] = 1;
   state.totalScore += task.pts;
   saveState(state);
   refreshAll();
   showToast(`✨ +${task.pts}分 · ${task.name} 打卡成功！`);
+}
+
+// 可重复任务：撤销一次打卡
+function decrementTask(taskId) {
+  if (editMode) return;
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const c = state.completedToday[taskId] || 0;
+  if (c <= 0) return;
+  state.completedToday[taskId] = c - 1;
+  if (state.completedToday[taskId] === 0) delete state.completedToday[taskId];
+  state.totalScore = Math.max(0, state.totalScore - task.pts);
+  saveState(state);
+  refreshAll();
+  showToast(`↩️ -${task.pts}分 · ${task.name}`);
 }
 
 function generateTaskId() {
@@ -1846,6 +1928,9 @@ function openAddTask() {
     <select id="editTaskCat">${dimOptions}</select>
     <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">积分奖励</label>
     <input id="editTaskPts" type="number" value="2" placeholder="积分" min="1" max="100">
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:4px;cursor:pointer">
+      <input type="checkbox" id="editTaskRepeat" style="width:18px;height:18px;accent-color:var(--mauve-600)"> 可重复打卡（同一事项一天内可多次计分）
+    </label>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
       <button class="btn-confirm" onclick="saveNewTask()">添加</button>
@@ -1858,8 +1943,9 @@ function saveNewTask() {
   const desc = document.getElementById('editTaskDesc').value.trim();
   const cat = document.getElementById('editTaskCat').value;
   const pts = parseInt(document.getElementById('editTaskPts').value) || 2;
+  const rep = document.getElementById('editTaskRepeat').checked;
   if (!name) { showToast('请输入任务名称'); return; }
-  state.tasks.push({ id: generateTaskId(), cat, name, desc, pts });
+  state.tasks.push({ id: generateTaskId(), cat, name, desc, pts, repeatable: rep });
   saveState(state);
   closeModal();
   refreshAll();
@@ -1882,6 +1968,9 @@ function openEditTask(taskId) {
     <select id="editTaskCat">${dimOptions}</select>
     <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">积分奖励</label>
     <input id="editTaskPts" type="number" value="${task.pts}" placeholder="积分" min="1" max="100">
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:4px;cursor:pointer">
+      <input type="checkbox" id="editTaskRepeat" ${task.repeatable ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--mauve-600)"> 可重复打卡（同一事项一天内可多次计分）
+    </label>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="deleteTask('${taskId}')">🗑️ 删除</button>
       <button class="btn-confirm" onclick="saveTaskEdit('${taskId}')">💾 保存</button>
@@ -1902,11 +1991,13 @@ function saveTaskEdit(taskId) {
   const desc = document.getElementById('editTaskDesc').value.trim();
   const cat = document.getElementById('editTaskCat').value;
   const pts = parseInt(document.getElementById('editTaskPts').value) || 1;
+  const rep = document.getElementById('editTaskRepeat').checked;
   if (!name) { showToast('请输入任务名称'); return; }
   task.name = name;
   task.desc = desc;
   task.cat = cat;
   task.pts = pts;
+  task.repeatable = rep;
   saveState(state);
   closeModal();
   refreshAll();
@@ -1916,9 +2007,10 @@ function saveTaskEdit(taskId) {
 function deleteTask(taskId) {
   const task = state.tasks.find(t => t.id === taskId);
   if (!task) return;
-  // Remove from completed if present
+  // Remove from completed if present (按打卡次数扣回积分)
   if (state.completedToday[taskId]) {
-    state.totalScore = Math.max(0, state.totalScore - task.pts);
+    const c = state.completedToday[taskId] || 0;
+    state.totalScore = Math.max(0, state.totalScore - task.pts * c);
     delete state.completedToday[taskId];
   }
   state.tasks = state.tasks.filter(t => t.id !== taskId);
@@ -1946,7 +2038,8 @@ function loadReviewIntoForm() {
   document.getElementById('reviewParent').value = state.review.parent || '';
   document.getElementById('reviewSupport').value = state.review.support || '';
   // Stats
-  const todayDone = Object.keys(state.completedToday).length;
+  let todayDone = 0;
+  Object.keys(state.completedToday).forEach(tid => { todayDone += (state.completedToday[tid] || 0); });
   const dimsLit = new Set();
   Object.keys(state.completedToday).forEach(tid => {
     const t = state.tasks.find(x => x.id === tid);
