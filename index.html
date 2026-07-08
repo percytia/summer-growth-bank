@@ -604,6 +604,7 @@ body {
   font-weight: 700;
   color: white;
 }
+.badge-tiny { background: linear-gradient(135deg, #E6DCD6, #D8C8C0); }
 .badge-small { background: linear-gradient(135deg, #D4C5C0, #C8B0A8); }
 .badge-mid { background: linear-gradient(135deg, #C8B5C0, #B8A8A3); }
 .badge-big { background: linear-gradient(135deg, #B5A0A8, #9E8C87); }
@@ -1253,6 +1254,10 @@ const DEFAULT_TASKS = [
 ];
 
 const DEFAULT_REWARDS = {
+  tiny: { label: '1分 · 小小奖励', cls: 'badge-tiny', items: [
+    { name: '一个鼓励小贴纸', pts: 1 }, { name: '一句真心夸奖', pts: 1 },
+    { name: '自主选择一个小决定', pts: 1 },
+  ]},
   small: { label: '10分 · 小奖励', cls: 'badge-small', items: [
     { name: '选择一次家庭电影', pts: 10 }, { name: '点播一次睡前故事', pts: 10 },
     { name: '选择一次晚餐菜单', pts: 10 }, { name: '多玩30分钟游戏', pts: 10 },
@@ -1271,7 +1276,16 @@ const DEFAULT_REWARDS = {
 function loadState() {
   try {
     const raw = localStorage.getItem('growth_bank_state');
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const s = JSON.parse(raw);
+      // 迁移：补齐新增的奖励档（如 tiny 小小奖励），避免老用户看不到
+      if (s.rewards) {
+        Object.keys(DEFAULT_REWARDS).forEach(k => {
+          if (!s.rewards[k]) s.rewards[k] = JSON.parse(JSON.stringify(DEFAULT_REWARDS[k]));
+        });
+      }
+      return s;
+    }
   } catch(e) {}
   return {
     tasks: JSON.parse(JSON.stringify(DEFAULT_TASKS)),
@@ -2089,6 +2103,7 @@ function loadReviewIntoForm() {
 function renderRewards() {
   const container = document.getElementById('rewardsList');
   const tiers = [
+    { key: 'tiny', ...state.rewards.tiny },
     { key: 'small', ...state.rewards.small },
     { key: 'mid', ...state.rewards.mid },
     { key: 'big', ...state.rewards.big },
