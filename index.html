@@ -2153,6 +2153,17 @@ function saveRewardEdit(tier, idx) {
 }
 
 function deleteRewardItem(tier, idx) {
+  const item = state.rewards[tier].items[idx];
+  if (!item) return;
+  showConfirm(
+    '🗑️ 删除奖励确认',
+    `确定要删除奖励「<b style="color:var(--mauve-700)">${escapeHtml(item.name)}</b>」吗？<br>删除后无法恢复。`,
+    '🗑️ 确认删除',
+    `doDeleteRewardItem('${tier}', ${idx})`
+  );
+}
+
+function doDeleteRewardItem(tier, idx) {
   state.rewards[tier].items.splice(idx, 1);
   saveState(state);
   closeModal();
@@ -2210,8 +2221,20 @@ function handleFileUpload(event) {
 }
 
 function deletePortfolioItem(id) {
-  state.portfolio = state.portfolio.filter(p => p.id !== id);
+  const item = state.portfolio.find(p => p.id == id);
+  if (!item) return;
+  showConfirm(
+    '🗑️ 删除作品确认',
+    `确定要删除作品「<b style="color:var(--mauve-700)">${escapeHtml(item.name)}</b>」吗？<br>删除后无法恢复。`,
+    '🗑️ 确认删除',
+    `doDeletePortfolioItem('${id}')`
+  );
+}
+
+function doDeletePortfolioItem(id) {
+  state.portfolio = state.portfolio.filter(p => p.id != id);
   saveState(state);
+  closeModal();
   renderGallery();
   showToast('作品已删除');
 }
@@ -2256,6 +2279,24 @@ function closeModal() {
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+
+// ============ GENERIC CONFIRM DIALOG ============
+// 统一的二次确认对话框：用于所有「编辑 / 删除」等不可逆或重要内容变更操作，
+// 防止误触。title 标题、msgHtml 说明（可含 HTML）、confirmText 确认按钮文字、
+// onConfirmStr 点击确认后执行的 JS 语句、confirmStyle 可选自定义确认按钮样式。
+function showConfirm(title, msgHtml, confirmText, onConfirmStr, confirmStyle) {
+  const style = confirmStyle || 'background:linear-gradient(135deg,#C98B82,#B97A72);border-color:#B97A72';
+  const html = `
+    <div style="padding:2px">
+      <h3 style="font-size:17px;font-weight:700;color:var(--mauve-700);margin:0 0 10px">${title}</h3>
+      <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;margin:0 0 18px">${msgHtml}</p>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">取消</button>
+        <button class="btn-confirm" style="${style}" onclick="${onConfirmStr}">${confirmText}</button>
+      </div>
+    </div>`;
+  showModal(html);
+}
 
 // ============ PAGE SWITCHING ============
 function switchPage(page) {
