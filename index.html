@@ -382,8 +382,8 @@ body {
   font-size: 20px;
   margin-bottom: 10px;
 }
-.dim-card .dim-name { font-size: 16px; font-weight: 700; color: var(--mauve-700); margin-bottom: 4px; }
-.dim-card .dim-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.dim-card .dim-name { font-size: 16px; font-weight: 700; color: #4A3F3C; margin-bottom: 4px; }
+.dim-card .dim-desc { font-size: 13px; color: #6B5C59; line-height: 1.5; }
 .dim-card .dim-progress {
   margin-top: 10px;
   display: flex;
@@ -391,7 +391,7 @@ body {
   gap: 6px;
 }
 .dim-card .dim-stars { color: #FBBF24; font-size: 14px; }
-.dim-card .dim-count { font-size: 13px; color: var(--mauve-700); font-weight: 600; }
+.dim-card .dim-count { font-size: 13px; color: #4A3F3C; font-weight: 600; }
 
 /* dim colors */
 .dim-learn .dim-icon { background: #F4EDEA; }
@@ -888,16 +888,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  padding: 10px 12px;
   background: var(--mauve-50);
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 14px;
+  color: #4A3F3C;
+  font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
 }
 .task-popup-item:hover { background: var(--mauve-100); }
 .task-popup-item.completed { opacity: 0.5; text-decoration: line-through; }
-.task-popup-item .task-popup-pts { font-weight: 700; color: var(--mauve-600); }
+.task-popup-item .task-popup-pts { font-weight: 700; color: #8B6F6C; flex-shrink: 0; }
 
 /* ========== Edit mode ========== */
 .edit-toggle {
