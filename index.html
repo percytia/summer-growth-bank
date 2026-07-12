@@ -1264,7 +1264,7 @@ const CAT_NAMES = { learn: '学习力', sport: '运动力', control: '自控力'
 const CAT_CLASSES = { learn: 'cat-learn', sport: 'cat-sport', control: 'cat-control', explore: 'cat-explore', practice: 'cat-practice' };
 
 // 构建标记：打开浏览器控制台 (F12 → Console) 即可看到，用于确认 NAS 上跑的是哪一份
-const BUILD_TAG = '2026-07-12-autosync';
+const BUILD_TAG = '2026-07-12-autosync-setup';
 console.log('[成长银行] build:', BUILD_TAG);
 
 const DEFAULT_TASKS = [
@@ -1786,6 +1786,35 @@ function closeSettings() {
   document.getElementById('settingsOverlay').style.display = 'none';
 }
 
+// 首次打开且未配置同步时，弹出友好引导（每台设备只提示一次）
+function maybeShowSetupGuide() {
+  try { if (localStorage.getItem('growth_bank_setup_done') === '1') return; } catch(e) {}
+  if (isSyncEnabled()) { try { localStorage.setItem('growth_bank_setup_done', '1'); } catch(e) {} return; }
+  var html = `
+    <div style="padding:4px;text-align:center">
+      <div style="font-size:40px;margin-bottom:6px">🏦✨</div>
+      <h3 style="font-size:19px;font-weight:700;color:var(--mauve-700);margin:0 0 10px">欢迎使用「暑期成长银行」</h3>
+      <p style="font-size:14px;color:var(--text-secondary);line-height:1.7;margin:0 0 14px">
+        开启<b>云端同步</b>后，打卡、积分、奖励会<b>自动保存到云端</b>，<br>
+        手机 / 平板 / 电脑多设备共享同一份数据，永不丢失。
+      </p>
+      <div style="text-align:left;background:var(--mauve-50);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text-secondary);line-height:1.85;margin-bottom:16px">
+        🔑 填入 <b>GitHub Token</b> + <b>家庭码</b>（两行字，30 秒搞定）<br>
+        🔄 之后每次打卡<b>自动上传</b>，无需手动点按钮<br>
+        👨‍👩‍👧 全家共用一个家庭码，进度实时互通
+      </div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="dismissSetupGuide()">稍后再说</button>
+        <button class="btn-confirm" onclick="closeModal();openSettings()">⚙️ 立即设置</button>
+      </div>
+    </div>`;
+  showModal(html);
+}
+function dismissSetupGuide() {
+  try { localStorage.setItem('growth_bank_setup_done', '1'); } catch(e) {}
+  closeModal();
+}
+
 function saveSettings() {
   SYNC_CONFIG.backend = _uiBackend;
   SYNC_CONFIG.token = document.getElementById('ghTokenInput').value.trim();
@@ -1795,6 +1824,7 @@ function saveSettings() {
   closeSettings();
 
   if (isSyncEnabled()) {
+    try { localStorage.setItem('growth_bank_setup_done', '1'); } catch(e) {}
     showToast('⏳ 正在同步…');
     syncPull(false).then(function() {
       return syncPush();
@@ -2537,6 +2567,8 @@ function init() {
   }
   // Start periodic auto-sync
   startAutoSync();
+  // 首次未配置设备弹出同步引导（每台设备仅一次）
+  maybeShowSetupGuide();
 }
 
 init();
