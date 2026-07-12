@@ -637,6 +637,14 @@ body {
   white-space: nowrap;
 }
 .reward-item .ri-action:hover { background: var(--mauve-100); }
+.reward-item .ri-pts {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mauve-600);
+  white-space: nowrap;
+  padding: 0 12px;
+  flex: 0 0 auto;
+}
 .reward-note {
   margin-top: 20px;
   padding: 14px;
@@ -822,6 +830,13 @@ body {
 /* ========== Settings Modal ========== */
 .modal-title { font-size:18px; font-weight:700; margin-bottom:8px; color:var(--text-primary); }
 .modal-desc { font-size:12px; color:var(--text-muted); margin-bottom:20px; line-height:1.5; }
+.backend-tabs { display:flex; gap:8px; margin-bottom:16px; background:var(--mauve-50); padding:4px; border-radius:12px; }
+.backend-tab {
+  flex:1; padding:9px 8px; border:none; border-radius:9px; cursor:pointer;
+  font-size:13px; font-weight:700; font-family:inherit; color:var(--text-secondary);
+  background:transparent; transition:var(--transition);
+}
+.backend-tab.active { background:var(--mauve-600); color:#fff; box-shadow:0 2px 8px rgba(107,92,89,0.18); }
 .settings-field { margin-bottom:16px; }
 .settings-field label { font-size:13px; font-weight:700; display:block; margin-bottom:4px; color:var(--text-secondary); }
 .settings-field input {
@@ -1166,23 +1181,38 @@ body {
 <!-- Settings Modal -->
 <div class="modal-overlay" id="settingsOverlay" style="display:none">
   <div class="modal" style="max-width:420px;max-height:90vh;overflow-y:auto">
-    <div class="modal-title">☁️ 云同步设置（GitHub）</div>
-    <div class="modal-desc">使用 GitHub Gist 私有存储实现跨设备数据同步。天然无 CORS，完全免费，无需额外注册。</div>
+    <div class="modal-title" id="settingsTitle">🏠 家庭同步设置（NAS 自托管）</div>
+    <div class="modal-desc" id="settingsDesc">数据存放在你自家的绿联 NAS，同源访问、无需公网、隐私最高。</div>
 
-    <div class="settings-field">
-      <label>🔑 GitHub Personal Access Token</label>
-      <input type="password" id="ghTokenInput" placeholder="github_pat_xxxxxxxxxxxx" autocomplete="off">
-      <div class="hint">在 <b>GitHub → Settings → Developer settings → Fine-grained tokens</b> 中生成，需要 <code>gist</code> 权限</div>
+    <div class="backend-tabs">
+      <button id="backendNasBtn" class="backend-tab active" onclick="selectBackend('nas')">🏠 NAS（主）</button>
+      <button id="backendGistBtn" class="backend-tab" onclick="selectBackend('gist')">☁️ GitHub（备）</button>
+    </div>
+
+    <div id="nasFields">
+      <div class="settings-field">
+        <label>🖥️ NAS 服务地址</label>
+        <input type="text" id="nasUrlInput" placeholder="http://192.168.1.23:8765" autocomplete="off">
+        <div class="hint">绿联 NAS 上部署后的地址。局域网填 <code>http://192.168.1.23:8765</code>；外网用 UGREENlink 域名（https）。结尾不要带 <code>/</code></div>
+      </div>
+    </div>
+
+    <div id="gistFields" style="display:none">
+      <div class="settings-field">
+        <label>🔑 GitHub Personal Access Token</label>
+        <input type="password" id="ghTokenInput" placeholder="github_pat_xxxxxxxxxxxx" autocomplete="off">
+        <div class="hint">在 <b>GitHub → Settings → Developer settings → Fine-grained tokens</b> 中生成，需要 <code>gist</code> 权限</div>
+      </div>
     </div>
 
     <div class="settings-field">
       <label>👨‍👩‍👧‍👦 家庭码</label>
       <input type="text" id="familyCodeInput" placeholder="例如 percytia2026" maxlength="30">
-      <div class="hint">所有设备使用相同的家庭码，数据即可互通。每个家庭自动创建一个私有 Gist</div>
+      <div class="hint">所有设备使用相同的家庭码，数据即可互通</div>
     </div>
 
     <div class="settings-actions" style="margin-bottom:10px">
-      <button class="btn-cancel" onclick="testGithubConnection()" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">🔍 测试连接</button>
+      <button class="btn-cancel" onclick="testConnection()" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">🔍 测试连接</button>
       <button class="btn-cancel" onclick="syncPull(true)" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">📥 手动拉取</button>
     </div>
 
@@ -1196,22 +1226,20 @@ body {
     </div>
 
     <div class="setup-guide" id="setupGuide">
-      <strong>📖 如何获取 GitHub Token：</strong><br>
-      1. 打开 <a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color:var(--mauve-600)">github.com/settings/tokens</a><br>
-      2. 点「<b>Generate new token</b>」（Fine-grained）<br>
-      3. Token name 填：<code>growth-bank-sync</code><br>
-      4. Expiration 选：<code>90 days</code> 或更长<br>
-      5. Repository access：<code>Only select repositories</code> → 不选任何仓库（或选 public）<br>
-      6. <b>Permissions → Account permissions → Gist</b>：选 <b>Read and write</b><br>
-      7. 点 Generate token，复制生成的 token 填入上方<br>
+      <strong>🏠 NAS 自托管（推荐，主）：</strong><br>
+      1. 把 <code>nas-server</code> 文件夹拷到绿联 NAS<br>
+      2. Docker 里用 Compose 启动容器（详见部署手册）<br>
+      3. 上面「NAS 服务地址」填 <code>http://192.168.1.23:8765</code><br>
+      4. 家庭码所有设备保持一致，点「保存并同步」<br>
+      5. 外网访问：在 NAS 开启 UGREENlink，用它给的 https 域名替换地址即可<br>
+      • ✅ 数据只存自家 NAS，隐私最高，无需公网 IP<br>
+      • ✅ 同源访问，无 CORS / 混合内容问题<br>
       <br>
-      <strong>💡 为什么用 GitHub Gist？</strong><br>
-      • ✅ 天然无 CORS（github.io 和 api.github.com 同源）<br>
-      • ✅ 完全免费，无限存储<br>
-      • ✅ 数据存为私有 Gist，只有你能访问<br>
-      • ✅ 无需注册额外服务，你已有 GitHub 账号<br>
-      • ⚠️ Token 存在浏览器本地存储中，不会上传到任何服务器
-      • 无需代理/VPN，数据安全合规
+      <strong>☁️ GitHub Gist（备用）：</strong><br>
+      1. 打开 <a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color:var(--mauve-600)">github.com/settings/tokens</a> → Generate（Fine-grained）<br>
+      2. <b>Permissions → Account → Gist</b> 选 <b>Read and write</b>，生成后填入上方<br>
+      • ✅ 外网随时可达，作 NAS 的容灾/异地备用<br>
+      • ⚠️ Token 仅存在浏览器本地，不上传任何服务器
     </div>
   </div>
 </div>
@@ -1234,6 +1262,10 @@ const DIMENSIONS = [
 const CAT_NAMES = { learn: '学习力', sport: '运动力', control: '自控力', explore: '探索力', practice: '实践力' };
 const CAT_CLASSES = { learn: 'cat-learn', sport: 'cat-sport', control: 'cat-control', explore: 'cat-explore', practice: 'cat-practice' };
 
+// 构建标记：打开浏览器控制台 (F12 → Console) 即可看到，用于确认 NAS 上跑的是哪一份
+const BUILD_TAG = '2026-07-12-flat-rewards';
+console.log('[成长银行] build:', BUILD_TAG);
+
 const DEFAULT_TASKS = [
   { id: 't1', cat: 'learn', name: '认真写日记', desc: '记录今天的所见所思', pts: 2, repeatable: false },
   { id: 't2', cat: 'learn', name: '课外阅读30分钟', desc: '选一本好书，静心阅读', pts: 2, repeatable: false },
@@ -1253,24 +1285,23 @@ const DEFAULT_TASKS = [
   { id: 't16', cat: 'practice', name: '照顾植物/宠物', desc: '培养责任心与爱心', pts: 1, repeatable: false },
 ];
 
-const DEFAULT_REWARDS = {
-  tiny: { label: '1分 · 小小奖励', cls: 'badge-tiny', items: [
-    { name: '一个鼓励小贴纸', pts: 1 }, { name: '一句真心夸奖', pts: 1 },
-    { name: '自主选择一个小决定', pts: 1 },
-  ]},
-  small: { label: '10分 · 小奖励', cls: 'badge-small', items: [
-    { name: '选择一次家庭电影', pts: 10 }, { name: '点播一次睡前故事', pts: 10 },
-    { name: '选择一次晚餐菜单', pts: 10 }, { name: '多玩30分钟游戏', pts: 10 },
-  ]},
-  mid: { label: '30分 · 中奖励', cls: 'badge-mid', items: [
-    { name: '买一本喜欢的书', pts: 30 }, { name: '一次朋友聚会', pts: 30 },
-    { name: '一次亲子外出', pts: 30 }, { name: 'DIY手工材料包', pts: 30 },
-  ]},
-  big: { label: '60分 · 大奖励', cls: 'badge-big', items: [
-    { name: '一次短途旅行', pts: 60 }, { name: '实现一个期待的小愿望', pts: 60 },
-    { name: '去游乐园玩一天', pts: 60 }, { name: '选一个心仪的玩具', pts: 60 },
-  ]},
-};
+const DEFAULT_REWARDS = [
+  { name: '一个鼓励小贴纸', pts: 1 },
+  { name: '一句真心夸奖', pts: 1 },
+  { name: '自主选择一个小决定', pts: 1 },
+  { name: '选择一次家庭电影', pts: 10 },
+  { name: '点播一次睡前故事', pts: 10 },
+  { name: '选择一次晚餐菜单', pts: 10 },
+  { name: '多玩30分钟游戏', pts: 10 },
+  { name: '买一本喜欢的书', pts: 30 },
+  { name: '一次朋友聚会', pts: 30 },
+  { name: '一次亲子外出', pts: 30 },
+  { name: 'DIY手工材料包', pts: 30 },
+  { name: '一次短途旅行', pts: 60 },
+  { name: '实现一个期待的小愿望', pts: 60 },
+  { name: '去游乐园玩一天', pts: 60 },
+  { name: '选一个心仪的玩具', pts: 60 },
+];
 
 // ============ STATE ============
 function loadState() {
@@ -1278,11 +1309,20 @@ function loadState() {
     const raw = localStorage.getItem('growth_bank_state');
     if (raw) {
       const s = JSON.parse(raw);
-      // 迁移：补齐新增的奖励档（如 tiny 小小奖励），避免老用户看不到
+      // 迁移：旧版奖励按大中小分档(tiny/small/mid/big)，新版为扁平数组
       if (s.rewards) {
-        Object.keys(DEFAULT_REWARDS).forEach(k => {
-          if (!s.rewards[k]) s.rewards[k] = JSON.parse(JSON.stringify(DEFAULT_REWARDS[k]));
-        });
+        if (!Array.isArray(s.rewards)) {
+          const flat = [];
+          Object.keys(s.rewards).forEach(k => {
+            const tier = s.rewards[k];
+            if (tier && Array.isArray(tier.items)) {
+              tier.items.forEach(it => flat.push({ name: it.name, pts: it.pts }));
+            }
+          });
+          s.rewards = flat;
+        }
+      } else {
+        s.rewards = JSON.parse(JSON.stringify(DEFAULT_REWARDS));
       }
       return s;
     }
@@ -1308,10 +1348,17 @@ function saveState(state) {
 function getDateKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function getMonday(d) { const n = new Date(d); n.setDate(n.getDate() - ((n.getDay() + 6) % 7)); n.setHours(0,0,0,0); return n.toISOString().split('T')[0]; }
 
-// ============ CLOUD SYNC (GitHub Gist API) ============
-// 使用 GitHub Gist 私有存储实现跨设备数据同步
-// 天然无 CORS（github.io → api.github.com 同源），完全免费，无需额外注册
-var SYNC_CONFIG = { token: '', familyCode: '' };
+// ============ CLOUD SYNC (可切换后端：NAS 自托管 / GitHub Gist) ============
+// backend='nas' -> 数据存自家绿联 NAS（同源 API，无 CORS，隐私最高）
+// backend='gist' -> 数据存 GitHub Gist（外网可达，作容灾/备用）
+// 智能默认后端：局域网 IP / localhost / .local 访问 -> 默认 NAS 自托管；
+// 公网域名（如 github.io）访问 -> 默认 Gist（打开即用，无需配置服务器）
+function defaultBackend() {
+  var h = location.hostname;
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(h) || h === 'localhost' || h.slice(-6) === '.local') return 'nas';
+  return 'gist';
+}
+var SYNC_CONFIG = { backend: defaultBackend(), token: '', familyCode: '', nasUrl: '' };
 var syncTimer = null;
 var syncLock = false;
 var _gistId = ''; // cached gist ID for this family
@@ -1321,15 +1368,18 @@ function loadSyncConfig() {
   try {
     var raw = localStorage.getItem('growth_bank_sync_config');
     if (raw) SYNC_CONFIG = JSON.parse(raw);
-  } catch(e) { SYNC_CONFIG = { token: '', familyCode: '' }; }
+  } catch(e) { SYNC_CONFIG = { backend: defaultBackend(), token: '', familyCode: '', nasUrl: '' }; }
   // Migrate old formats from CloudBase/Supabase/LeanCloud
   if (SYNC_CONFIG.provider && !SYNC_CONFIG.token) {
     if (SYNC_CONFIG.envId) {
       // Old format had provider + envId, keep familyCode
       var oldFamily = SYNC_CONFIG.familyCode || '';
-      SYNC_CONFIG = { token: '', familyCode: oldFamily };
+      SYNC_CONFIG = { backend: 'nas', token: '', familyCode: oldFamily, nasUrl: '' };
     }
   }
+  // 补齐新字段（老配置只有 token/familyCode）：有 token 无 nasUrl -> 默认沿用 gist 后端
+  if (!SYNC_CONFIG.backend) SYNC_CONFIG.backend = (SYNC_CONFIG.token && !SYNC_CONFIG.nasUrl) ? 'gist' : 'nas';
+  if (typeof SYNC_CONFIG.nasUrl !== 'string') SYNC_CONFIG.nasUrl = '';
   // Restore cached gist ID
   try { _gistId = localStorage.getItem('growth_bank_gist_id') || ''; } catch(e) {}
   updateSyncUi();
@@ -1342,7 +1392,9 @@ function saveSyncConfig() {
 }
 
 function isSyncEnabled() {
-  return !!(SYNC_CONFIG.token && SYNC_CONFIG.familyCode);
+  if (!SYNC_CONFIG.familyCode) return false;
+  if (SYNC_CONFIG.backend === 'nas') return !!SYNC_CONFIG.nasUrl;
+  return !!SYNC_CONFIG.token;
 }
 
 // --- GitHub Gist API helpers ---
@@ -1403,7 +1455,30 @@ function findGistBySearch() {
   });
 }
 
-// --- Test connection ---
+// --- Test connection (按后端路由) ---
+function testConnection() {
+  return (SYNC_CONFIG.backend === 'nas') ? testNasConnection() : testGithubConnection();
+}
+
+function testNasConnection() {
+  var el = document.getElementById('nasUrlInput');
+  var base = ((el ? el.value.trim() : '') || SYNC_CONFIG.nasUrl || '').replace(/\/+$/, '');
+  if (!base) { showToast('⚠️ 请先填入 NAS 地址'); return; }
+  showToast('⏳ 正在测试 NAS 连接…');
+  fetch(base + '/api/health')
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(d) {
+      if (d && d.ok) showToast('✅ NAS 连接成功！');
+      else showToast('⚠️ NAS 响应异常');
+    })
+    .catch(function(e) {
+      var msg = e.message || '';
+      if (msg.indexOf('Failed to fetch') >= 0) showToast('❌ 连不上 NAS，检查地址/网络/是否同一局域网');
+      else showToast('❌ ' + msg.substring(0, 55));
+    });
+}
+
+// --- Test connection (GitHub) ---
 function testGithubConnection() {
   var tokenInput = document.getElementById('ghTokenInput');
   var token = (tokenInput ? tokenInput.value.trim() : '') || SYNC_CONFIG.token;
@@ -1441,8 +1516,71 @@ function testGithubConnection() {
   });
 }
 
-// --- Pull state from cloud ---
+// --- 后端路由：根据 SYNC_CONFIG.backend 分发到 NAS 或 Gist ---
 function syncPull(notify) {
+  return (SYNC_CONFIG.backend === 'nas') ? nasPull(notify) : gistPull(notify);
+}
+function syncPush() {
+  return (SYNC_CONFIG.backend === 'nas') ? nasPush() : gistPush();
+}
+
+// ===== NAS 后端（自托管，同源 API）=====
+function nasApiBase() {
+  return (SYNC_CONFIG.nasUrl || '').trim().replace(/\/+$/, '');
+}
+
+function nasPull(notify) {
+  if (!isSyncEnabled() || syncLock) return Promise.resolve();
+  syncLock = true;
+  var url = nasApiBase() + '/api/state/' + encodeURIComponent(SYNC_CONFIG.familyCode);
+  return fetch(url, { method: 'GET' })
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(data) {
+      if (!data || !data.exists || !data.state) {
+        // NAS 尚无该家庭数据 -> 上传本地
+        if (notify) showToast('📤 NAS 尚无数据，正在上传…');
+        syncLock = false;
+        return nasPush();
+      }
+      state = data.state;
+      localStorage.setItem('growth_bank_state', JSON.stringify(state));
+      refreshAll();
+      if (notify) showToast('📥 已从 NAS 同步最新数据');
+      updateSyncUi(true);
+    })
+    .catch(function(e) {
+      console.error('[nasPull] Error:', e);
+      if (notify) showToast('⚠️ NAS 同步失败: ' + (e.message || '网络错误').substring(0, 40));
+      updateSyncUi(false);
+    })
+    .finally(function() { syncLock = false; });
+}
+
+function nasPush() {
+  if (!isSyncEnabled() || syncLock) return Promise.resolve();
+  syncLock = true;
+  var url = nasApiBase() + '/api/state/' + encodeURIComponent(SYNC_CONFIG.familyCode);
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(state)
+  })
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function() { updateSyncUi(true); })
+    .catch(function(e) {
+      console.error('[nasPush] Error:', e);
+      updateSyncUi(false);
+      var now = Date.now();
+      if (!window._lastPushPermToast || now - window._lastPushPermToast > 8000) {
+        window._lastPushPermToast = now;
+        showToast('⚠️ NAS 上传失败：' + (e.message || '网络错误').substring(0, 52));
+      }
+    })
+    .finally(function() { syncLock = false; });
+}
+
+// --- Pull state from cloud (GitHub Gist) ---
+function gistPull(notify) {
   if (!isSyncEnabled() || syncLock) return Promise.resolve();
   syncLock = true;
 
@@ -1450,7 +1588,7 @@ function syncPull(notify) {
     if (!gist) {
       // No gist exists yet -> push local data up
       if (notify) showToast('📤 云端尚无数据，正在上传…');
-      return syncPush();
+      return gistPush();
     }
 
     // Parse state from gist file content
@@ -1458,7 +1596,7 @@ function syncPull(notify) {
     var file = gist.files[fname];
     if (!file || !file.content) {
       if (notify) showToast('📤 云端文件为空，正在上传…');
-      return syncPush();
+      return gistPush();
     }
 
     try {
@@ -1480,8 +1618,8 @@ function syncPull(notify) {
   }).finally(function() { syncLock = false; });
 }
 
-// --- Push state to cloud ---
-function syncPush() {
+// --- Push state to cloud (GitHub Gist) ---
+function gistPush() {
   if (!isSyncEnabled() || syncLock) return Promise.resolve();
   syncLock = true;
 
@@ -1552,7 +1690,7 @@ function updateSyncUi(online) {
   }
   if (online === true) {
     dot.textContent = '🟢';
-    dot.title = '已同步 (GitHub)';
+    dot.title = '已同步 (' + (SYNC_CONFIG.backend === 'nas' ? 'NAS' : 'GitHub') + ')';
     dot.className = 'sync-dot synced';
   } else if (online === false) {
     dot.textContent = '🔴';
@@ -1593,15 +1731,48 @@ function stateSig(s) {
 
 // 手动上传当前本地数据到云端
 function syncPushManual() {
-  if (!isSyncEnabled()) { showToast('⚠️ 请先在上方填写 Token 和家庭码'); return; }
-  showToast('⏳ 正在上传到云端…');
-  syncPush().then(function() { showToast('✅ 已上传到云端'); });
+  if (!isSyncEnabled()) {
+    showToast(SYNC_CONFIG.backend === 'nas' ? '⚠️ 请先填写 NAS 地址和家庭码' : '⚠️ 请先填写 Token 和家庭码');
+    return;
+  }
+  var dest = SYNC_CONFIG.backend === 'nas' ? 'NAS' : '云端';
+  showToast('⏳ 正在上传到' + dest + '…');
+  syncPush().then(function() { showToast('✅ 已上传到' + dest); });
 }
 
 // --- Settings UI ---
+var _uiBackend = 'nas'; // 当前设置面板选中的后端
+
+function selectBackend(backend) {
+  _uiBackend = backend;
+  var nasBtn = document.getElementById('backendNasBtn');
+  var gistBtn = document.getElementById('backendGistBtn');
+  var nasFields = document.getElementById('nasFields');
+  var gistFields = document.getElementById('gistFields');
+  var title = document.getElementById('settingsTitle');
+  var desc = document.getElementById('settingsDesc');
+  if (backend === 'nas') {
+    nasBtn.className = 'backend-tab active';
+    gistBtn.className = 'backend-tab';
+    nasFields.style.display = 'block';
+    gistFields.style.display = 'none';
+    title.textContent = '🏠 家庭同步设置（NAS 自托管）';
+    desc.textContent = '数据存放在你自家的绿联 NAS，同源访问、无需公网、隐私最高。';
+  } else {
+    nasBtn.className = 'backend-tab';
+    gistBtn.className = 'backend-tab active';
+    nasFields.style.display = 'none';
+    gistFields.style.display = 'block';
+    title.textContent = '☁️ 家庭同步设置（GitHub 备用）';
+    desc.textContent = '数据存 GitHub 私有 Gist，外网可达，可作 NAS 的容灾/备用。';
+  }
+}
+
 function openSettings() {
   document.getElementById('ghTokenInput').value = SYNC_CONFIG.token || '';
   document.getElementById('familyCodeInput').value = SYNC_CONFIG.familyCode || '';
+  document.getElementById('nasUrlInput').value = SYNC_CONFIG.nasUrl || '';
+  selectBackend(SYNC_CONFIG.backend || 'nas');
   document.getElementById('settingsOverlay').style.display = 'flex';
 }
 
@@ -1610,7 +1781,9 @@ function closeSettings() {
 }
 
 function saveSettings() {
+  SYNC_CONFIG.backend = _uiBackend;
   SYNC_CONFIG.token = document.getElementById('ghTokenInput').value.trim();
+  SYNC_CONFIG.nasUrl = document.getElementById('nasUrlInput').value.trim();
   SYNC_CONFIG.familyCode = document.getElementById('familyCodeInput').value.trim().toLowerCase();
   saveSyncConfig();
   closeSettings();
@@ -1620,7 +1793,7 @@ function saveSettings() {
     syncPull(false).then(function() {
       return syncPush();
     }).then(function() {
-      showToast('✅ 同步已启用');
+      showToast('✅ 同步已启用（' + (SYNC_CONFIG.backend === 'nas' ? 'NAS' : 'GitHub') + '）');
     }).catch(function(e) {
       showToast('⚠️ ' + (e.message || '同步失败'));
     });
@@ -2102,95 +2275,89 @@ function loadReviewIntoForm() {
 // ============ REWARDS ============
 function renderRewards() {
   const container = document.getElementById('rewardsList');
-  const tiers = [
-    { key: 'tiny', ...state.rewards.tiny },
-    { key: 'small', ...state.rewards.small },
-    { key: 'mid', ...state.rewards.mid },
-    { key: 'big', ...state.rewards.big },
-  ];
-  container.innerHTML = tiers.map(tier => `
-    <div class="reward-card">
-      <div class="reward-badge ${tier.cls}">${tier.label}</div>
-      <div class="reward-title">${tier.label.split('·')[1]?.trim() || tier.label}</div>
-      <div class="reward-items">
-        ${tier.items.map((item, i) => `
-          <div class="reward-item">
-            <span class="ri-name">🎯 ${item.name}</span>
-            <span class="ri-action" onclick="editReward('${tier.key}', ${i})">✏️ 修改</span>
-          </div>
-        `).join('')}
-      </div>
-      <button class="btn-primary" style="width:100%;margin:12px 0 0;font-size:13px;padding:10px"
-        onclick="addRewardItem('${tier.key}')">+ 添加自定义奖励</button>
+  if (!state.rewards || !state.rewards.length) {
+    container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:24px">还没有奖励，点下面按钮添加吧～</div>';
+    return;
+  }
+  container.innerHTML = `
+    <div class="reward-items">
+      ${state.rewards.map((item, idx) => `
+        <div class="reward-item">
+          <span class="ri-name">🎯 ${escapeHtml(item.name)}</span>
+          <span class="ri-pts">需要 ${item.pts} 分兑换</span>
+          <span class="ri-action" onclick="editReward(${idx})">✏️ 修改</span>
+        </div>
+      `).join('')}
     </div>
-  `).join('');
+    <button class="btn-primary" style="width:100%;margin:14px 0 0;font-size:13px;padding:10px"
+      onclick="addRewardItem()">+ 添加自定义奖励</button>
+  `;
 }
 
-function editReward(tier, idx) {
-  const item = state.rewards[tier].items[idx];
+function editReward(idx) {
+  const item = state.rewards[idx];
   const html = `
     <h3>✏️ 修改奖励内容</h3>
     <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">奖励名称</label>
-    <input id="editRewardName" value="${item.name}" placeholder="输入奖励名称">
+    <input id="editRewardName" value="${(escapeHtml(item.name)).replace(/"/g,'&quot;')}" placeholder="输入奖励名称">
     <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">所需积分</label>
     <input id="editRewardPts" type="number" value="${item.pts}" placeholder="积分">
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="deleteRewardItem('${tier}', ${idx})">删除</button>
-      <button class="btn-confirm" onclick="saveRewardEdit('${tier}', ${idx})">保存</button>
+      <button class="btn-cancel" onclick="deleteRewardItem(${idx})">删除</button>
+      <button class="btn-confirm" onclick="saveRewardEdit(${idx})">保存</button>
     </div>`;
   showModal(html);
 }
 
-function saveRewardEdit(tier, idx) {
+function saveRewardEdit(idx) {
   const name = document.getElementById('editRewardName').value.trim();
   const pts = parseInt(document.getElementById('editRewardPts').value) || 10;
   if (!name) { showToast('请输入奖励名称'); return; }
-  state.rewards[tier].items[idx] = { name, pts };
+  state.rewards[idx] = { name, pts };
   saveState(state);
   closeModal();
   renderRewards();
   showToast('奖励已更新！');
 }
 
-function deleteRewardItem(tier, idx) {
-  const item = state.rewards[tier].items[idx];
+function deleteRewardItem(idx) {
+  const item = state.rewards[idx];
   if (!item) return;
   showConfirm(
     '🗑️ 删除奖励确认',
     `确定要删除奖励「<b style="color:var(--mauve-700)">${escapeHtml(item.name)}</b>」吗？<br>删除后无法恢复。`,
     '🗑️ 确认删除',
-    `doDeleteRewardItem('${tier}', ${idx})`
+    `doDeleteRewardItem(${idx})`
   );
 }
 
-function doDeleteRewardItem(tier, idx) {
-  state.rewards[tier].items.splice(idx, 1);
+function doDeleteRewardItem(idx) {
+  state.rewards.splice(idx, 1);
   saveState(state);
   closeModal();
   renderRewards();
   showToast('奖励已删除');
 }
 
-function addRewardItem(tier) {
-  const ptsMap = { small: 10, mid: 30, big: 60 };
+function addRewardItem() {
   const html = `
     <h3>➕ 添加自定义奖励</h3>
     <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">奖励名称</label>
     <input id="newRewardName" placeholder="例如：去游泳馆玩一天">
     <label style="font-size:13px;font-weight:600;color:var(--text-secondary)">所需积分</label>
-    <input id="newRewardPts" type="number" value="${ptsMap[tier]}" placeholder="积分">
+    <input id="newRewardPts" type="number" value="10" placeholder="积分">
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn-confirm" onclick="saveNewReward('${tier}')">添加</button>
+      <button class="btn-confirm" onclick="saveNewReward()">添加</button>
     </div>`;
   showModal(html);
 }
 
-function saveNewReward(tier) {
+function saveNewReward() {
   const name = document.getElementById('newRewardName').value.trim();
   const pts = parseInt(document.getElementById('newRewardPts').value) || 10;
   if (!name) { showToast('请输入奖励名称'); return; }
-  state.rewards[tier].items.push({ name, pts });
+  state.rewards.push({ name, pts });
   saveState(state);
   closeModal();
   renderRewards();
