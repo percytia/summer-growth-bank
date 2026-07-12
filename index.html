@@ -1216,9 +1216,10 @@ body {
       <button class="btn-cancel" onclick="syncPull(true)" style="flex:1;border:2px solid var(--mauve-200);border-radius:12px;background:var(--mauve-50);font-size:13px;font-weight:700;color:var(--text-secondary)">📥 手动拉取</button>
     </div>
 
-    <div class="settings-actions" style="margin-bottom:12px">
-      <button class="btn-cancel" onclick="syncPushManual()" style="flex:1;border:2px solid var(--mauve-400);border-radius:12px;background:var(--mauve-100);font-size:13px;font-weight:700;color:var(--mauve-700)">📤 上传到云端</button>
+    <div class="settings-actions" style="margin-bottom:8px">
+      <button class="btn-cancel" onclick="syncPushManual()" style="flex:1;border:2px solid var(--mauve-400);border-radius:12px;background:var(--mauve-100);font-size:13px;font-weight:700;color:var(--mauve-700)">🔄 立即同步</button>
     </div>
+    <div class="hint" style="text-align:center;margin-bottom:12px">✅ 打卡 / 修改后会<b>自动上传云端</b>，无需手动操作；此按钮仅用于「立刻强制同步一次」。</div>
 
     <div class="settings-actions">
       <button class="btn-cancel" onclick="closeSettings()">返回</button>
@@ -1263,7 +1264,7 @@ const CAT_NAMES = { learn: '学习力', sport: '运动力', control: '自控力'
 const CAT_CLASSES = { learn: 'cat-learn', sport: 'cat-sport', control: 'cat-control', explore: 'cat-explore', practice: 'cat-practice' };
 
 // 构建标记：打开浏览器控制台 (F12 → Console) 即可看到，用于确认 NAS 上跑的是哪一份
-const BUILD_TAG = '2026-07-12-flat-rewards';
+const BUILD_TAG = '2026-07-12-autosync';
 console.log('[成长银行] build:', BUILD_TAG);
 
 const DEFAULT_TASKS = [
@@ -1673,10 +1674,15 @@ function gistPush() {
 
 // --- Debounced auto-push ---
 function autoSyncPush() {
+  if (!isSyncEnabled()) return;
+  updateSyncUi(); // 🟡 等待同步（给用户即时反馈：已在排队上传）
   clearTimeout(syncTimer);
   syncTimer = setTimeout(function() {
-    if (isSyncEnabled()) syncPush();
-  }, 500);
+    if (!isSyncEnabled()) return;
+    syncPush()
+      .then(function() { updateSyncUi(true); })   // 🟢 已同步
+      .catch(function() { updateSyncUi(false); }); // 🔴 失败
+  }, 600);
 }
 
 // --- Sync indicator ---
