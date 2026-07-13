@@ -1203,6 +1203,8 @@ body {
         <input type="password" id="ghTokenInput" placeholder="github_pat_xxxxxxxxxxxx" autocomplete="off">
         <div class="hint">在 <b>GitHub → Settings → Developer settings → Fine-grained tokens</b> 中生成，需要 <code>gist</code> 权限</div>
       </div>
+      <button class="btn-primary" style="width:100%;margin-top:4px;font-size:13px;padding:11px" onclick="quickFillFamily()">⚡ 一键填入家庭码（家人专用）</button>
+      <div class="hint" style="margin-top:6px">家庭码已安全内置，点一下即填好。GitHub 禁止把 Token 写进公开网页，<b>Token 仍需各设备粘贴一次</b>（家人私发你的 <code>github_pat_...</code> 串）。</div>
     </div>
 
     <div class="settings-field">
@@ -1264,7 +1266,7 @@ const CAT_NAMES = { learn: '学习力', sport: '运动力', control: '自控力'
 const CAT_CLASSES = { learn: 'cat-learn', sport: 'cat-sport', control: 'cat-control', explore: 'cat-explore', practice: 'cat-practice' };
 
 // 构建标记：打开浏览器控制台 (F12 → Console) 即可看到，用于确认 NAS 上跑的是哪一份
-const BUILD_TAG = '2026-07-12-autosync-setup';
+const BUILD_TAG = '2026-07-13-quickfill';
 console.log('[成长银行] build:', BUILD_TAG);
 
 const DEFAULT_TASKS = [
@@ -1363,6 +1365,12 @@ var SYNC_CONFIG = { backend: defaultBackend(), token: '', familyCode: '', nasUrl
 var syncTimer = null;
 var syncLock = false;
 var _gistId = ''; // cached gist ID for this family
+
+// 家庭预设（一键填入用）：家庭码可安全内置；Token 因 GitHub 机密扫描禁止写入公开网页，需各设备粘贴一次
+var FAMILY_PRESET = {
+  familyCode: 'percytia2026'
+};
+
 
 // --- Config load / save ---
 function loadSyncConfig() {
@@ -1813,6 +1821,13 @@ function maybeShowSetupGuide() {
 function dismissSetupGuide() {
   try { localStorage.setItem('growth_bank_setup_done', '1'); } catch(e) {}
   closeModal();
+}
+
+// 一键填入家庭同步配置：家庭码可安全内置；Token 因 GitHub 机密扫描禁止入公开页，需粘贴一次
+function quickFillFamily() {
+  document.getElementById('familyCodeInput').value = FAMILY_PRESET.familyCode;
+  if (SYNC_CONFIG.backend !== 'gist') selectBackend('gist');
+  showToast('✅ 家庭码已填入，再粘贴 Token 后点「保存并同步」');
 }
 
 function saveSettings() {
